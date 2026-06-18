@@ -63,6 +63,10 @@
   .inp select{text-align:left;font-family:var(--sans);font-size:13px}
   .inp.with-unit input{padding-right:38px}
   .inp .u{position:absolute;right:10px;font-family:var(--mono);font-size:11.5px;color:var(--muted-2);pointer-events:none}
+  /* Modulo 01: unità di misura FUORI dalla casella (a destra), per non sovrapporsi al numero */
+  .ele .inp.with-unit, .dyn-row .inp.with-unit{gap:6px}
+  .ele .inp.with-unit input, .dyn-row .inp.with-unit input{width:auto;flex:1 1 auto;min-width:0;padding-right:9px}
+  .ele .inp.with-unit .u, .dyn-row .inp.with-unit .u{position:static;right:auto;flex:none}
   input:focus,select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input[readonly]{background:var(--cool-soft);border-style:dashed;color:var(--cool)}
