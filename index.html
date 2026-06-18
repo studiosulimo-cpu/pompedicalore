@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dimensionamento PdC · Fabbisogno e potenza</title>
+<style>
+  :root{
+    --ink:#14202B; --bg:#EBEEF1; --card:#FFFFFF;
+    --line:#D6DDE3; --line-strong:#B7C2CC; --muted:#5B6B78; --muted-2:#8595A1;
+    --heat:#D9531E; --heat-soft:#FBEAE2;
+    --water:#1F7A8C; --water-soft:#E2F0F2;
+    --cool:#2B79B5; --cool-soft:#E4EFF8;
+    --field:#F6F8F9; --focus:#2B6CB0;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 64px}
+
+  header{border-bottom:1px solid var(--line);background:var(--card)}
+  .head-inner{max-width:1080px;margin:0 auto;padding:20px 20px 0}
+  .brand .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--heat);font-weight:700;margin:0 0 6px}
+  .brand h1{font-size:23px;line-height:1.1;margin:0;font-weight:750;letter-spacing:-.01em}
+  .brand p{margin:6px 0 0;color:var(--muted);font-size:13px;max-width:60ch}
+
+  .stepper{display:flex;gap:0;margin-top:18px;border-bottom:1px solid var(--line)}
+  .step{display:flex;align-items:center;gap:10px;background:none;border:0;cursor:pointer;
+    padding:12px 18px 14px;position:relative;font-family:var(--sans);color:var(--muted);font-size:13.5px}
+  .step .sn{font-family:var(--mono);font-size:12px;width:24px;height:24px;border-radius:6px;
+    display:grid;place-items:center;border:1px solid var(--line-strong);color:var(--muted-2);flex:none;transition:.15s}
+  .step .stext{text-align:left;line-height:1.2}
+  .step .stext b{display:block;font-weight:650;color:inherit}
+  .step .stext small{font-size:11px;color:var(--muted-2)}
+  .step[aria-selected="true"]{color:var(--ink)}
+  .step[aria-selected="true"] .sn{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .step[aria-selected="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:-1px;height:2px;background:var(--heat)}
+  .step .arrow{color:var(--line-strong);margin:0 2px}
+  @media(max-width:620px){.step .stext small{display:none}.step{padding:11px 12px 13px;gap:8px}}
+
+  .module[hidden]{display:none}
+  .grid{display:grid;grid-template-columns:1fr 392px;gap:28px;margin-top:26px;align-items:start}
+  @media(max-width:880px){.grid{grid-template-columns:1fr;gap:20px}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card + .card{margin-top:18px}
+  .card-h{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);background:#FCFDFE}
+  .card-h .n{font-family:var(--mono);font-size:12px;color:var(--muted-2);border:1px solid var(--line-strong);
+    border-radius:5px;width:24px;height:24px;display:grid;place-items:center;flex:none}
+  .card-h h2{font-size:14.5px;margin:0;font-weight:680;letter-spacing:.005em}
+  .card-h .toggle{margin-left:auto}
+  .card-b{padding:16px 18px}
+
+  .row{display:grid;grid-template-columns:1fr 132px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px dotted var(--line)}
+  .row:last-child{border-bottom:0;padding-bottom:2px}
+  .row label{font-size:13.5px;color:var(--ink)}
+  .row label small{display:block;color:var(--muted-2);font-size:11.5px;margin-top:1px}
+  .inp{position:relative;display:flex;align-items:center}
+  .inp input,.inp select{width:100%;font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--field);
+    border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;text-align:right;-moz-appearance:textfield}
+  .inp select{text-align:left;font-family:var(--sans);font-size:13px}
+  .inp.with-unit input{padding-right:38px}
+  .inp .u{position:absolute;right:10px;font-family:var(--mono);font-size:11.5px;color:var(--muted-2);pointer-events:none}
+  input:focus,select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[readonly]{background:var(--cool-soft);border-style:dashed;color:var(--cool)}
+  .full{grid-template-columns:1fr}.full .inp{margin-top:2px}
+
+  .sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+  .sw input{position:absolute;opacity:0;pointer-events:none}
+  .sw .track{width:38px;height:21px;border-radius:11px;background:var(--line-strong);position:relative;transition:background .16s}
+  .sw .track::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .16s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .sw input:checked + .track{background:var(--heat)}
+  .sw input:checked + .track::after{transform:translateX(17px)}
+  .sw input:focus-visible + .track{box-shadow:0 0 0 3px rgba(43,108,176,.3)}
+  .sw .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+  .collapsible[hidden]{display:none}
+
+  .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;background:var(--field)}
+  .seg button{border:0;background:none;font-family:var(--sans);font-size:12.5px;color:var(--muted);
+    padding:7px 13px;cursor:pointer;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
+
+  .geo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:520px){.geo{grid-template-columns:1fr 1fr}}
+  .geo .gcell label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:4px}
+  .vol-readout{display:flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dotted var(--line)}
+  .vol-readout .k{font-size:13px;color:var(--muted)}
+  .vol-readout .v{font-family:var(--mono);font-weight:650;font-size:18px}
+  .vol-readout .v small{font-size:12px;color:var(--muted-2);font-weight:500;margin-left:3px}
+
+  /* righe carico fisse */
+  .ele{display:grid;grid-template-columns:34px 1fr 116px 96px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dotted var(--line)}
+  .ele .e-n{font-family:var(--mono);font-size:11.5px;color:var(--muted-2);text-align:center}
+  .ele .e-lbl{font-size:12.8px;line-height:1.25}
+  .ele .e-lbl em{font-style:normal;color:var(--muted-2);font-size:11px;display:block}
+  .ele .inp input{padding:7px 9px;font-size:13px}
+  .ele .e-out{font-family:var(--mono);font-size:13px;text-align:right;color:var(--ink);white-space:nowrap}
+  .ele .e-out small{color:var(--muted-2);font-size:10.5px;margin-left:2px}
+  .ele.linked .inp input{background:var(--cool-soft);border-style:dashed;color:var(--cool)}
+  @media(max-width:600px){
+    .ele{grid-template-columns:30px 1fr 96px;grid-template-rows:auto auto;row-gap:4px}
+    .ele .e-out{grid-column:2 / 4;text-align:left;color:var(--muted);font-size:12px}
+    .ele .e-out::before{content:"= "}
+  }
+  .ele-head{display:grid;grid-template-columns:34px 1fr 116px 96px;gap:10px;padding:0 0 8px;
+    font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-2);font-weight:700;border-bottom:1px solid var(--line)}
+  .ele-head span:nth-child(3),.ele-head span:nth-child(4){text-align:right}
+  @media(max-width:600px){.ele-head{display:none}}
+
+  /* sotto-sezioni dinamiche */
+  .subsec{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+  .subsec-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .subsec-h h3{font-size:13px;margin:0;font-weight:680}
+  .subsec-h .dom{margin-left:auto;font-size:11.5px;color:var(--cool);font-weight:600;background:var(--cool-soft);
+    border:1px solid #BFDCF2;border-radius:6px;padding:3px 9px}
+  .dyn-row{display:grid;grid-template-columns:1fr 104px 92px 30px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dotted var(--line)}
+  .dyn-row select{width:100%;font-family:var(--sans);font-size:12.5px;background:var(--field);border:1px solid var(--line-strong);border-radius:7px;padding:7px 9px}
+  .dyn-row .inp input{padding:7px 9px;font-size:13px}
+  .dyn-out{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--ink);white-space:nowrap}
+  .dyn-out small{color:var(--muted-2);font-size:10px;margin-left:2px}
+  .dyn-out.pt4{color:var(--muted-2)}
+  .dyn-rm{border:1px solid var(--line-strong);background:var(--card);color:var(--muted);border-radius:6px;
+    width:28px;height:30px;cursor:pointer;font-size:15px;line-height:1}
+  .dyn-rm:hover{border-color:var(--heat);color:var(--heat)}
+  .dyn-add{margin-top:10px;border:1px dashed var(--line-strong);background:var(--field);color:var(--cool);
+    font-family:var(--sans);font-size:12.5px;font-weight:600;border-radius:8px;padding:8px 14px;cursor:pointer}
+  .dyn-add:hover{border-color:var(--cool)}
+  @media(max-width:600px){.dyn-row{grid-template-columns:1fr 84px 28px;grid-template-rows:auto auto;row-gap:4px}
+    .dyn-out{grid-column:1 / 3;text-align:left;color:var(--muted)}.dyn-out::before{content:"= "}}
+  .subsec .win-note{font-size:11.5px;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:7px;padding:8px 11px;margin-top:8px;line-height:1.45}
+  .subsec-toggle{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--muted)}
+
+  .panel{position:sticky;top:18px}
+  .readout{background:var(--ink);color:#fff;border-radius:12px;padding:20px 20px 8px;box-shadow:0 12px 30px -16px rgba(20,32,43,.6)}
+  .readout .ro-eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#8FA6B5;font-weight:700;margin:0 0 14px}
+  .gauge{padding:14px 0;border-top:1px solid rgba(255,255,255,.1)}
+  .gauge:first-of-type{border-top:0;padding-top:0}
+  .gauge .g-lbl{font-size:12px;color:#A9BBC7;margin:0 0 4px;display:flex;align-items:center;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .dot.heat{background:var(--heat)}.dot.water{background:#56C2D6}.dot.cool{background:#56A6E0}
+  .gauge .g-val{font-family:var(--mono);font-weight:600;font-size:34px;line-height:1;letter-spacing:-.01em}
+  .gauge .g-val .un{font-size:15px;color:#8FA6B5;font-weight:500;margin-left:6px}
+  .gauge.heat .g-val{color:#FF8A57}.gauge.water .g-val{color:#74D2E3}.gauge.cool .g-val{color:#7CBDF0}
+
+  .sub{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;margin-top:-6px;padding:6px 18px 14px}
+  .sub-item{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px dotted var(--line);font-size:13px}
+  .sub-item:last-child{border-bottom:0}
+  .sub-item .k{color:var(--muted)}
+  .sub-item .v{font-family:var(--mono);font-weight:600;font-size:14px;color:var(--ink);white-space:nowrap}
+  .sub-item .v small{color:var(--muted-2);font-weight:500;font-size:11px;margin-left:3px}
+  .sub-item.off{opacity:.4}
+
+  .feed{margin-top:12px;background:var(--cool-soft);border:1px solid #BFDCF2;border-radius:10px;padding:13px 14px}
+  .feed .ft{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--cool);font-weight:700;margin:0 0 8px}
+  .feed .fv{font-family:var(--mono);font-size:18px;font-weight:650;color:var(--ink)}
+  .feed .fv small{font-size:12px;color:var(--muted-2);font-weight:500}
+  .feed button{margin-top:11px;width:100%;border:0;border-radius:8px;background:var(--cool);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px;cursor:pointer}
+  .feed button:hover{background:#236699}
+
+  .note-acc{font-size:11.5px;color:var(--muted);background:var(--water-soft);border:1px solid #CDE5E9;border-radius:8px;padding:10px 12px;margin-top:12px;line-height:1.5}
+  .note-acc b{color:var(--water)}
+  .src-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--cool);font-weight:600;margin-top:5px}
+  .src-badge.hide{display:none}
+
+  details.method{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+  details.method>summary{padding:14px 18px;cursor:pointer;font-weight:650;font-size:14px;list-style:none;display:flex;align-items:center;gap:10px}
+  details.method>summary::-webkit-details-marker{display:none}
+  details.method>summary .chev{margin-left:auto;color:var(--muted-2);transition:transform .15s}
+  details.method[open]>summary .chev{transform:rotate(90deg)}
+  .method-body{padding:2px 20px 20px;border-top:1px solid var(--line);font-size:13.5px}
+  .method-body h3{font-size:13px;margin:18px 0 6px;color:var(--heat);letter-spacing:.02em;text-transform:uppercase;font-weight:700}
+  .method-body p{margin:0 0 10px;color:#33424E}
+  .formula{font-family:var(--mono);font-size:13px;background:var(--field);border:1px solid var(--line);border-radius:7px;padding:10px 12px;margin:8px 0;overflow-x:auto}
+  .method-body ul{margin:6px 0 12px;padding-left:18px;color:#33424E}.method-body li{margin:3px 0}
+  .disclaimer{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:12px;line-height:1.55}
+
+  .stepnav{display:flex;justify-content:space-between;margin-top:24px;gap:12px}
+  .stepnav button{font-family:var(--sans);font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:9px;cursor:pointer;border:1px solid var(--line-strong);background:var(--card);color:var(--ink)}
+  .stepnav button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .stepnav button.primary:hover{background:#0c1620}
+  .stepnav .spacer{flex:1}
+
+  footer{max-width:1080px;margin:34px auto 0;padding:0 20px;color:var(--muted-2);font-size:11.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="brand">
+      <p class="eyebrow">Dimensionamento preventivo · multi-modulo</p>
+      <h1>Pompa di calore · dal fabbisogno alla potenza</h1>
+      <p>Catena di calcolo: il fabbisogno termico dell'ambiente alimenta automaticamente la potenza richiesta dal modulo di dimensionamento della pompa di calore.</p>
+    </div>
+    <div class="stepper" role="tablist">
+      <button class="step" role="tab" aria-selected="true" data-go="1">
+        <span class="sn">01</span><span class="stext"><b>Fabbisogno freddo</b><small>carico di raffrescamento</small></span>
+      </button>
+      <span class="arrow" aria-hidden="true">›</span>
+      <button class="step" role="tab" aria-selected="false" data-go="2">
+        <span class="sn">02</span><span class="stext"><b>Pompa di calore</b><small>potenza e accumulo</small></span>
+      </button>
+      <span class="arrow" aria-hidden="true">›</span>
+      <button class="step" role="tab" aria-selected="false" data-go="3">
+        <span class="sn">03</span><span class="stext"><b>Accumulo ACS</b><small>UNI 9182 · periodo di punta</small></span>
+      </button>
+      <span class="arrow" aria-hidden="true">›</span>
+      <button class="step" role="tab" aria-selected="false" data-go="4">
+        <span class="sn">04</span><span class="stext"><b>Volano termico</b><small>anti-pendolazione</small></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ===================== MODULO 1 ===================== -->
+  <div class="module" data-step="1">
+    <div class="grid">
+      <div class="inputs">
+
+        <section class="card">
+          <div class="card-h"><span class="n">A</span><h2>Geometria e zona</h2></div>
+          <div class="card-b">
+            <div class="geo">
+              <div class="gcell"><label>Lunghezza (m)</label><div class="inp"><input id="g_l" type="number" step="0.1" value="16"></div></div>
+              <div class="gcell"><label>Larghezza (m)</label><div class="inp"><input id="g_w" type="number" step="0.1" value="5"></div></div>
+              <div class="gcell"><label>Altezza (m)</label><div class="inp"><input id="g_h" type="number" step="0.1" value="5.5"></div></div>
+            </div>
+            <div class="vol-readout"><span class="k">Volume del locale</span><span class="v"><span id="g_vol">440,0</span><small>m³</small></span></div>
+            <div class="row" style="border-bottom:0;padding-top:14px">
+              <label>Zona climatica<small>seleziona i coefficienti</small></label>
+              <div class="seg" id="zona" role="group" style="justify-self:end">
+                <button data-z="0" aria-pressed="true">Nord</button>
+                <button data-z="1" aria-pressed="false">Centro</button>
+                <button data-z="2" aria-pressed="false">Sud / Isole</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">B</span><h2>Carichi di raffrescamento</h2></div>
+          <div class="card-b">
+            <div class="ele-head"><span>#</span><span>Elemento</span><span>Quantità</span><span>Parziale</span></div>
+            <div id="eles"></div>
+
+            <!-- Finestre dinamiche -->
+            <div class="subsec">
+              <div class="subsec-h">
+                <h3>Finestre esposte</h3>
+                <span class="dom" id="winDom">dominante: —</span>
+              </div>
+              <div id="wins"></div>
+              <button class="dyn-add" id="addWin">+ Aggiungi finestra</button>
+              <div class="subsec-toggle">
+                <label class="sw"><input id="winDominant" type="checkbox" checked><span class="track"></span></label>
+                <span>Applica la regola del metodo: solo l'esposizione dominante al punto 3, le altre al punto 4 (coeff. diffuso). Disattiva per sommare tutte le esposizioni a pieno coefficiente.</span>
+              </div>
+            </div>
+
+            <!-- Solai dinamici -->
+            <div class="subsec">
+              <div class="subsec-h"><h3>Solai e coperture</h3></div>
+              <div id="solai"></div>
+              <button class="dyn-add" id="addSolaio">+ Aggiungi solaio / copertura</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="panel">
+        <div class="readout">
+          <p class="ro-eyebrow">Carico di raffrescamento</p>
+          <div class="gauge cool"><p class="g-lbl"><span class="dot cool"></span>Fabbisogno totale freddo</p><div class="g-val"><span id="f_kw">—</span><span class="un">kW</span></div></div>
+        </div>
+        <div class="sub">
+          <div class="sub-item"><span class="k">Potenza totale</span><span class="v"><span id="f_w">—</span> <small>W</small></span></div>
+          <div class="sub-item"><span class="k">di cui finestre</span><span class="v"><span id="f_win">—</span> <small>W</small></span></div>
+          <div class="sub-item"><span class="k">di cui solai/coperture</span><span class="v"><span id="f_solai">—</span> <small>W</small></span></div>
+          <div class="sub-item"><span class="k">Equivalente</span><span class="v"><span id="f_btu">—</span> <small>BTU/h</small></span></div>
+          <div class="sub-item"><span class="k">Carico specifico</span><span class="v"><span id="f_spec">—</span> <small>W/m²</small></span></div>
+          <div class="feed">
+            <p class="ft">Collegamento al modulo PdC</p>
+            <div class="fv"><span id="f_link">—</span> <small>kW → Potenza richiesta dall'impianto</small></div>
+            <button id="toPdc">Usa nel dimensionamento PdC →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stepnav"><div class="spacer"></div><button class="primary" data-go="2">Vai al modulo Pompa di calore →</button></div>
+  </div>
+
+  <!-- ===================== MODULO 2 ===================== -->
+  <div class="module" data-step="2" hidden>
+    <div class="grid">
+      <div class="inputs">
+
+        <section class="card">
+          <div class="card-h"><span class="n">1</span><h2>Impianto</h2></div>
+          <div class="card-b">
+            <div class="row">
+              <label>Potenza richiesta dall'impianto<span class="src-badge hide" id="srcBadge">↳ dal Modulo 01 · Fabbisogno</span></label>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <div class="seg" id="pimpMode" style="font-size:11px">
+                  <button data-m="link" aria-pressed="false">Da fabbisogno</button>
+                  <button data-m="man" aria-pressed="true">Manuale</button>
+                </div>
+                <div class="inp with-unit" style="width:132px"><input id="P_imp" type="number" step="0.1" value="76.2"><span class="u">kW</span></div>
+              </div>
+            </div>
+            <div class="row"><label>Ore di funzionamento giornaliero</label><div class="inp with-unit"><input id="h_imp" type="number" step="0.5" value="18"><span class="u">h</span></div></div>
+            <div class="row"><label>Salto termico ai terminali</label><div class="inp with-unit"><input id="dT_term" type="number" step="1" value="20"><span class="u">°C</span></div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">2</span><h2>Acqua calda sanitaria</h2>
+            <label class="sw toggle"><input id="acs" type="checkbox"><span class="track"></span><span class="lbl" id="acsLbl">Esclusa</span></label></div>
+          <div class="card-b collapsible" id="acsBox" hidden>
+            <div class="row"><label>Consumo acqua giornaliero</label><div class="inp with-unit"><input id="V_acs" type="number" step="10" value="200"><span class="u">l</span></div></div>
+            <div class="row"><label>Temperatura acqua acquedotto</label><div class="inp with-unit"><input id="T_rete" type="number" step="1" value="8"><span class="u">°C</span></div></div>
+            <div class="row"><label>Temperatura acqua di utilizzo</label><div class="inp with-unit"><input id="T_uso" type="number" step="1" value="45"><span class="u">°C</span></div></div>
+            <div class="row"><label>Numero cicli di consumo al giorno</label><div class="inp"><input id="n_cicli" type="number" step="1" min="1" value="1"></div></div>
+            <div class="row"><label>Tempo minimo tra due cicli</label><div class="inp with-unit"><input id="t_ciclo" type="number" step="0.5" value="1"><span class="u">h</span></div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">3</span><h2>Parametri pompa di calore</h2></div>
+          <div class="card-b">
+            <div class="row"><label>Ore di funzionamento PdC<small>nell'arco delle 24 h</small></label><div class="inp with-unit"><input id="h_pdc" type="number" step="0.5" value="18"><span class="u">h</span></div></div>
+            <div class="row"><label>Cicli di sbrinamento per ora<small>derating disponibilità = n / 10</small></label><div class="inp"><input id="n_sbrin" type="number" step="1" min="0" value="1"></div></div>
+            <div class="row"><label>Max calo temperatura accumulo<small>per ciclo di sbrinamento</small></label><div class="inp with-unit"><input id="dT_sb" type="number" step="0.5" value="4"><span class="u">°C</span></div></div>
+            <div class="row"><label>Margine di sicurezza sulla potenza</label><div class="inp with-unit"><input id="margine" type="number" step="1" value="0"><span class="u">%</span></div></div>
+            <div class="row" style="border-bottom:0"><label>Desurriscaldatore<small>recupero per preriscaldo ACS</small></label>
+              <label class="sw"><input id="desurr" type="checkbox"><span class="track"></span><span class="lbl" id="desurrLbl">Assente</span></label></div>
+            <div class="row collapsible" id="desurrBox" hidden><label>Potenza desurriscaldatore / potenza impianto</label><div class="inp"><input id="r_desurr" type="number" step="0.05" value="0.20"></div></div>
+            <div class="row" style="border-top:1px dotted var(--line)"><label>Rapporto potenza ACS / potenza impianto<small>resa PdC in produzione ACS</small></label><div class="inp"><input id="r_acs" type="number" step="0.05" value="0.70"></div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">4</span><h2>Terminali</h2></div>
+          <div class="card-b">
+            <div class="row full"><label>Tipologia <small id="rangeHint">Range contenuto: 10–30 l/kW</small></label>
+              <div class="inp"><select id="tipo">
+                <option value="10|30">Radiatori tubolari in acciaio</option>
+                <option value="2|5">Radiatori in alluminio</option>
+                <option value="10|14">Pavimento radiante · passo 10 cm</option>
+                <option value="7|10">Pavimento radiante · passo 15 cm</option>
+                <option value="5|7">Pavimento radiante · passo 20 cm</option>
+                <option value="0.5|1">Fan coil</option>
+              </select></div></div>
+            <div class="row"><label>Contenuto acqua unitario<small>preimpostato sul minimo del range</small></label><div class="inp with-unit"><input id="unit" type="number" step="0.5" value="10"><span class="u">l/kW</span></div></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="panel">
+        <div class="readout">
+          <p class="ro-eyebrow">Risultato dimensionamento</p>
+          <div class="gauge heat"><p class="g-lbl"><span class="dot heat"></span>Potenza pompa di calore</p><div class="g-val"><span id="r_pdc">—</span><span class="un">kW</span></div></div>
+          <div class="gauge water"><p class="g-lbl"><span class="dot water"></span>Volume accumulo da installare</p><div class="g-val"><span id="r_acc">—</span><span class="un">litri</span></div></div>
+        </div>
+        <div class="sub">
+          <div class="sub-item"><span class="k">Potenza minima (senza margine)</span><span class="v"><span id="r_pmin">—</span> <small>kW</small></span></div>
+          <div class="sub-item" id="row_desurr"><span class="k">Potenza desurriscaldatore</span><span class="v"><span id="r_desurr_out">—</span> <small>kW</small></span></div>
+          <div class="sub-item"><span class="k">Energia giornaliera impianto</span><span class="v"><span id="r_eimp">—</span> <small>kWh</small></span></div>
+          <div class="sub-item" id="row_eacs"><span class="k">Energia giornaliera ACS</span><span class="v"><span id="r_eacs">—</span> <small>kWh</small></span></div>
+          <div class="sub-item"><span class="k">Contenuto minimo anti-sbrinamento</span><span class="v"><span id="r_vsbrin">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Contenuto utile nei terminali</span><span class="v"><span id="r_vterm">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Contenuto acqua totale richiesto</span><span class="v"><span id="r_vreq">—</span> <small>l</small></span></div>
+          <div class="note-acc">L'accumulo è dimensionato sul criterio <b>anti-sbrinamento</b>. Il volume da installare è la differenza tra contenuto richiesto e acqua già presente nei terminali.</div>
+        </div>
+      </div>
+    </div>
+    <div class="stepnav"><button data-go="1">← Torna al fabbisogno</button><div class="spacer"></div><button class="primary" data-go="3">Vai all'accumulo ACS →</button></div>
+  </div>
+
+  <!-- ===================== MODULO 3 · ACCUMULO ACS ===================== -->
+  <div class="module" data-step="3" hidden>
+    <div class="grid">
+      <div class="inputs">
+
+        <section class="card">
+          <div class="card-h"><span class="n">A</span><h2>Utenze nel periodo di punta</h2></div>
+          <div class="card-b">
+            <div class="ele-head" style="grid-template-columns:1fr 78px 92px 80px 30px"><span>Apparecchio</span><span>n.</span><span>l/utilizzo</span><span>util./h</span><span></span></div>
+            <div id="utenze"></div>
+            <button class="dyn-add" id="addUt">+ Aggiungi apparecchio</button>
+            <div class="win-note" style="margin-top:10px">Consumi unitari a temperatura di utilizzo (valori tipici indicativi): verificali sul prospetto E.2 della tua edizione UNI 9182. La durata del periodo di punta deriva dal prospetto F.1.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">B</span><h2>Temperature e periodo di punta</h2></div>
+          <div class="card-b">
+            <div class="row"><label>Durata del periodo di punta<small>prospetto F.1</small></label><div class="inp with-unit"><input id="a_tp" type="number" step="0.25" value="1"><span class="u">h</span></div></div>
+            <div class="row"><label>Temperatura acqua di utilizzo</label><div class="inp with-unit"><input id="a_Tuso" type="number" step="1" value="40"><span class="u">°C</span></div></div>
+            <div class="row"><label>Temperatura acqua acquedotto</label><div class="inp with-unit"><input id="a_Trete" type="number" step="1" value="10"><span class="u">°C</span></div></div>
+            <div class="row"><label>Temperatura di accumulo<small>≥ 60 °C per anti-legionella</small></label><div class="inp with-unit"><input id="a_Tacc" type="number" step="1" value="60"><span class="u">°C</span></div></div>
+            <div class="row" style="border-bottom:0"><label>Rendimento di stratificazione<small>quota di volume realmente utile</small></label><div class="inp"><input id="a_eta" type="number" step="0.05" value="0.90"></div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">C</span><h2>Generatore (PdC) per ACS</h2></div>
+          <div class="card-b">
+            <div class="row">
+              <label>Potenza disponibile per ACS<span class="src-badge hide" id="aSrcBadge">↳ Modulo 02 · P_PdC × r_ACS</span></label>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <div class="seg" id="paMode" style="font-size:11px">
+                  <button data-m="link" aria-pressed="false">Da PdC</button>
+                  <button data-m="man" aria-pressed="true">Manuale</button>
+                </div>
+                <div class="inp with-unit" style="width:132px"><input id="a_Pacs" type="number" step="0.1" value="3"><span class="u">kW</span></div>
+              </div>
+            </div>
+            <div class="row" style="border-bottom:0"><label>Tempo di preriscaldamento accumulo<small>prima del periodo di punta</small></label><div class="inp with-unit"><input id="a_tpr" type="number" step="0.25" value="0"><span class="u">h</span></div></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="panel">
+        <div class="readout">
+          <p class="ro-eyebrow">Dimensionamento accumulo ACS</p>
+          <div class="gauge water"><p class="g-lbl"><span class="dot water"></span>Volume preparatore richiesto</p><div class="g-val"><span id="a_vol">—</span><span class="un">litri</span></div></div>
+        </div>
+        <div class="sub">
+          <div class="sub-item"><span class="k">Prelievo di punta</span><span class="v"><span id="a_vp">—</span> <small>l @T_uso</small></span></div>
+          <div class="sub-item"><span class="k">Energia di punta</span><span class="v"><span id="a_ep">—</span> <small>kWh</small></span></div>
+          <div class="sub-item"><span class="k">Produzione PdC nel periodo</span><span class="v"><span id="a_egen">—</span> <small>kWh</small></span></div>
+          <div class="sub-item"><span class="k">Deficit a carico dell'accumulo</span><span class="v"><span id="a_def">—</span> <small>kWh</small></span></div>
+          <div class="sub-item"><span class="k">Volume utile (a T_acc)</span><span class="v"><span id="a_vutile">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Taglia commerciale suggerita</span><span class="v"><span id="a_comm">—</span> <small>l</small></span></div>
+          <div class="note-acc">Metodo UNI 9182 (App. G): il prelievo di punta è coperto dal volume accumulato più la produzione del generatore nel periodo. Il volume utile è maggiorato per il rendimento di stratificazione. Con preriscaldamento &gt; 0 l'accumulo parte già in temperatura.</div>
+        </div>
+      </div>
+    </div>
+    <div class="stepnav"><button data-go="2">← Torna alla pompa di calore</button><div class="spacer"></div><button class="primary" data-go="4">Vai al volano termico →</button></div>
+  </div>
+
+  <!-- ===================== MODULO 4 · VOLANO TERMICO ===================== -->
+  <div class="module" data-step="4" hidden>
+    <div class="grid">
+      <div class="inputs">
+
+        <section class="card">
+          <div class="card-h"><span class="n">A</span><h2>Pompa di calore</h2></div>
+          <div class="card-b">
+            <div class="row">
+              <label>Potenza PdC<small>usare la maggiore tra risc. e raffr.</small><span class="src-badge hide" id="vSrcBadge">↳ dal Modulo 02</span></label>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <div class="seg" id="vpMode" style="font-size:11px">
+                  <button data-m="link" aria-pressed="false">Da PdC</button>
+                  <button data-m="man" aria-pressed="true">Manuale</button>
+                </div>
+                <div class="inp with-unit" style="width:132px"><input id="v_P" type="number" step="0.1" value="10"><span class="u">kW</span></div>
+              </div>
+            </div>
+            <div class="row" style="border-bottom:0">
+              <label>Tipo di compressore</label>
+              <div class="seg" id="vType" role="group" style="justify-self:end">
+                <button data-t="onoff" aria-pressed="true">On/Off</button>
+                <button data-t="inv" aria-pressed="false">Inverter</button>
+              </div>
+            </div>
+            <div class="row collapsible" id="vModBox" hidden style="border-top:1px dotted var(--line)">
+              <label>Modulazione minima<small>frazione della potenza nominale</small></label>
+              <div class="inp"><input id="v_mod" type="number" step="0.05" value="0.30"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">B</span><h2>Criteri di dimensionamento</h2></div>
+          <div class="card-b">
+            <div class="row"><label>Max avviamenti/ora ammessi<small>anti-pendolazione</small></label><div class="inp"><input id="v_nmax" type="number" step="1" min="1" value="3"></div></div>
+            <div class="row"><label>ΔT del volano<small>banda di isteresi</small></label><div class="inp with-unit"><input id="v_dT" type="number" step="0.5" value="5"><span class="u">°C</span></div></div>
+            <div class="row"><label>Contenuto minimo del costruttore</label><div class="inp with-unit"><input id="v_kmin" type="number" step="0.5" value="6"><span class="u">l/kW</span></div></div>
+            <div class="row" style="border-bottom:0"><label>Considera anche il tempo minimo di funzionamento</label>
+              <label class="sw"><input id="v_useRun" type="checkbox"><span class="track"></span><span class="lbl" id="v_runLbl">No</span></label></div>
+            <div class="row collapsible" id="v_runBox" hidden><label>Tempo minimo di funzionamento compressore</label><div class="inp with-unit"><input id="v_tmin" type="number" step="1" value="6"><span class="u">min</span></div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h"><span class="n">C</span><h2>Acqua già presente nell'impianto</h2></div>
+          <div class="card-b">
+            <div class="row">
+              <label>Contenuto terminali<span class="src-badge hide" id="vTermBadge">↳ dal Modulo 02</span></label>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <div class="seg" id="vTermMode" style="font-size:11px">
+                  <button data-m="link" aria-pressed="false">Da terminali</button>
+                  <button data-m="man" aria-pressed="true">Manuale</button>
+                </div>
+                <div class="inp with-unit" style="width:132px"><input id="v_term" type="number" step="1" value="0"><span class="u">l</span></div>
+              </div>
+            </div>
+            <div class="row" style="border-bottom:0"><label>Acqua nelle tubazioni<small>solo volume non intercettabile</small></label><div class="inp with-unit"><input id="v_pipe" type="number" step="1" value="0"><span class="u">l</span></div></div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="panel">
+        <div class="readout">
+          <p class="ro-eyebrow">Dimensionamento volano</p>
+          <div class="gauge water"><p class="g-lbl"><span class="dot water"></span>Volano da installare</p><div class="g-val"><span id="v_vol">—</span><span class="un">litri</span></div></div>
+        </div>
+        <div class="sub">
+          <div class="sub-item"><span class="k">Potenza minima del compressore</span><span class="v"><span id="v_pmin">—</span> <small>kW</small></span></div>
+          <div class="sub-item"><span class="k">Criterio anti-pendolazione</span><span class="v"><span id="v_pend">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Criterio contenuto minimo costruttore</span><span class="v"><span id="v_cmin">—</span> <small>l</small></span></div>
+          <div class="sub-item" id="v_runRow"><span class="k">Criterio tempo minimo</span><span class="v"><span id="v_run">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Volume richiesto (vincolo maggiore)</span><span class="v"><span id="v_req">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Acqua impianto scomputata</span><span class="v"><span id="v_sys">—</span> <small>l</small></span></div>
+          <div class="sub-item"><span class="k">Energia utile accumulata @ΔT</span><span class="v"><span id="v_en">—</span> <small>kWh</small></span></div>
+          <div class="sub-item"><span class="k">Taglia commerciale suggerita</span><span class="v"><span id="v_comm">—</span> <small>l</small></span></div>
+          <div class="note-acc">Controllo con regola pratica (10–20 l/kW): <b><span id="v_band">—</span> l</b>. Il volume è il massimo tra i criteri attivi, meno l'acqua già presente. Conta solo il volume che la macchina "vede" (non intercettabile).</div>
+        </div>
+      </div>
+    </div>
+    <div class="stepnav"><button data-go="3">← Torna all'accumulo ACS</button><div class="spacer"></div></div>
+  </div>
+
+  <details class="method">
+    <summary>Metodo e ipotesi di calcolo <span class="chev">›</span></summary>
+    <div class="method-body">
+      <h3>Modulo 01 · Carico di raffrescamento</h3>
+      <p>Metodo speditivo a coefficienti: per ogni elemento si applica una potenza specifica in W per unità, differenziata per zona climatica; il carico totale è la somma dei parziali.</p>
+      <h3>Finestre · esposizione dominante</h3>
+      <p>Regola del metodo: si conteggia al punto 3 (apporto solare diretto pieno) solo l'esposizione con la maggiore insolazione totale; tutte le altre finestre vanno al punto 4 con il coefficiente diffuso (36/48/66 W/m² per zona). Il tool determina automaticamente l'esposizione dominante sommando, per ciascuna esposizione, area × coefficiente, e selezionando la maggiore.</p>
+      <div class="formula">dominante = max esposizione ( Σ area × coeff_esp )   ·   altre finestre → area × coeff_punto4</div>
+      <h3>Modulo 02 · Potenza PdC e accumulo</h3>
+      <div class="formula">P_min = ( E_imp / h_PdC + (E_ACS/n_cicli)/r_ACS/t_ciclo ) / ( 1 − n_sbrin/10 )      P_PdC = P_min × (1+margine/100)</div>
+      <div class="formula">V_sbrin = 0,05 × (P_imp + P_PdC) × 860 / ΔT_sbrin      V_accumulo = max(V_sbrin − contenuto_unitario × P_imp ; 0)</div>
+
+      <h3>Modulo 03 · Accumulo ACS (UNI 9182, App. G)</h3>
+      <p>Dimensionamento sul periodo di punta: il prelievo di punta è coperto dal volume accumulato più la produzione del generatore nel periodo.</p>
+      <div class="formula">V_punta = Σ ( n × l/utilizzo × utilizzi/h ) × durata_punta      E_punta = V_punta × (T_uso − T_rete) × 1,163 / 1000</div>
+      <div class="formula">V_accumulo = max(E_punta − P_ACS·(t_punta+t_preriscaldo) ; 0) × 1000 / (1,163 × (T_acc − T_rete)) / η_stratificazione</div>
+
+      <h3>Modulo 04 · Volano termico</h3>
+      <p>Volume richiesto come massimo tra i criteri attivi, meno l'acqua già presente nell'impianto (solo volume non intercettabile che la macchina "vede"). Per inverter P_min,compr = P_PdC × modulazione_min; per on/off = P_PdC.</p>
+      <div class="formula">anti-pendolazione:  V = P_min,compr / (4 × N_max × 1,163 × ΔT)      contenuto minimo:  V = k × P_PdC</div>
+      <div class="formula">tempo minimo (opz.):  V = P_min,compr × t_min / (1,163 × ΔT)      V_installare = max(criteri) − acqua_impianto</div>
+
+      <div class="disclaimer">Strumento di pre-dimensionamento per stime di prima approssimazione. Mod. 02 su metodologia AiCARR – M. Vio (caso comune); Mod. 03 su UNI 9182 App. G con consumi unitari da verificare sul prospetto E.2; Mod. 04 su criterio anti-pendolazione e contenuto minimo del costruttore, con riscontro sulla regola pratica 10–20 l/kW. Il fabbisogno del modulo 01 è un carico di raffrescamento. Non sostituisce il calcolo di progetto né la verifica del costruttore. L'utilizzatore è l'unico responsabile della congruità dei risultati.</div>
+    </div>
+  </details>
+
+  <footer>Calcolo client-side · nessun dato trasmesso · deployabile su GitHub Pages</footer>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const num = id => { const v=parseFloat($(id).value); return isNaN(v)?0:v; };
+  const numEl = el => { const v=parseFloat(el.value); return isNaN(v)?0:v; };
+  const fmt = (x,d=1)=> !isFinite(x)?"—":x.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+  const state = { fabbisognoKW:0, pimpMode:'man', paMode:'man', pPdc:0, pAcs:0, vTerm:0, vpMode:'man', vTermMode:'man' };
+  let zona = 0;
+  let vMachineType='onoff';
+
+  /* ===== coefficienti ===== */
+  const SIMPLE = [
+    {n:'1', lbl:'Pavimento su terreno', unit:'m²', c:[7,7,7], geo:'floor', def:80},
+    {n:'2', lbl:'Rinnovo aria', unit:'m³', c:[6,7,8], geo:'vol', def:440},
+    {n:'5', lbl:'Parete esposta al sole', unit:'m²', c:[36,42,54], def:258},
+    {n:'6', lbl:'Pareti esterne non al sole', sub:'diverse dal punto 5', unit:'m²', c:[20,30,45], def:178},
+    {n:'7', lbl:'Pareti/pavimenti/soffitti su locali non climatizzati', unit:'m²', c:[10,15,20], def:0},
+    {n:'8', lbl:'Solai o pavimenti sotto locali non climatizzati', unit:'m²', c:[10,15,15], def:236},
+    {n:'12',lbl:'Occupanti', unit:'n.', c:[150,150,150], def:6},
+    {n:'13',lbl:'Luci', sub:'potenza installata', unit:'W', c:[1,1,1], direct:true, def:400},
+  ];
+  const WIN = [
+    {key:'SE', lbl:'S o E', c:[140,145,160]},
+    {key:'SO', lbl:'SO',    c:[250,265,280]},
+    {key:'O',  lbl:'O',     c:[345,360,380]},
+    {key:'NOSE',lbl:'NO o SE',c:[185,200,210]},
+  ];
+  const WIN_PT4 = [36,48,66];
+  const SOLAI = [
+    {key:'noniso', lbl:'Sottotetto a falda non isolato', c:[27,33,42]},
+    {key:'iso',    lbl:'Sottotetto a falda isolato',     c:[10,14,18]},
+    {key:'piano',  lbl:'Sottotetto piano',               c:[55,65,72]},
+  ];
+  const dirty = {};
+
+  /* ===== righe fisse ===== */
+  const cont = $('eles');
+  SIMPLE.forEach((e,i)=>{
+    const linked = !!e.geo;
+    const div=document.createElement('div');
+    div.className='ele'+(linked?' linked':'');
+    div.innerHTML='<span class="e-n">'+e.n+'</span>'+
+      '<span class="e-lbl">'+e.lbl+(e.sub?'<em>'+e.sub+'</em>':'')+'</span>'+
+      '<span class="inp with-unit"><input id="s_'+i+'" type="number" step="0.5" value="'+e.def+'"><span class="u">'+e.unit+'</span></span>'+
+      '<span class="e-out"><span id="so_'+i+'">0</span><small>W</small></span>';
+    cont.appendChild(div);
+  });
+
+  /* ===== finestre dinamiche ===== */
+  function winRow(exp, area){
+    const opts = WIN.map(w=>'<option value="'+w.key+'"'+(w.key===exp?' selected':'')+'>'+w.lbl+'</option>').join('');
+    const div=document.createElement('div'); div.className='dyn-row';
+    div.innerHTML='<select class="w-exp">'+opts+'</select>'+
+      '<span class="inp with-unit"><input class="w-area" type="number" step="0.5" value="'+area+'"><span class="u">m²</span></span>'+
+      '<span class="dyn-out"><span class="w-out">0</span><small>W</small></span>'+
+      '<button class="dyn-rm" title="Rimuovi">×</button>';
+    return div;
+  }
+  function addWin(exp,area){ $('wins').appendChild(winRow(exp||'SE', area==null?20:area)); }
+  [['SE',80],['SO',20],['O',30],['NOSE',18]].forEach(w=>addWin(w[0],w[1]));
+
+  /* ===== solai dinamici ===== */
+  function solaioRow(type, area){
+    const opts = SOLAI.map(s=>'<option value="'+s.key+'"'+(s.key===type?' selected':'')+'>'+s.lbl+'</option>').join('');
+    const div=document.createElement('div'); div.className='dyn-row';
+    div.innerHTML='<select class="sl-type">'+opts+'</select>'+
+      '<span class="inp with-unit"><input class="sl-area" type="number" step="0.5" value="'+area+'"><span class="u">m²</span></span>'+
+      '<span class="dyn-out"><span class="sl-out">0</span><small>W</small></span>'+
+      '<button class="dyn-rm" title="Rimuovi">×</button>';
+    return div;
+  }
+  function addSolaio(type,area){ $('solai').appendChild(solaioRow(type||'noniso', area==null?100:area)); }
+  addSolaio('noniso',372.5);
+
+  /* ===== geometria ===== */
+  function syncGeo(){
+    const L=num('g_l'), W=num('g_w'), H=num('g_h'); const vol=L*W*H;
+    $('g_vol').textContent=fmt(vol,1);
+    SIMPLE.forEach((e,i)=>{
+      if(e.geo==='floor' && !dirty.floor) $('s_'+i).value=+(L*W).toFixed(2);
+      if(e.geo==='vol'   && !dirty.vol)   $('s_'+i).value=+vol.toFixed(2);
+    });
+  }
+
+  /* ===== calcolo fabbisogno ===== */
+  function computeFab(){
+    let simpleW=0;
+    SIMPLE.forEach((e,i)=>{
+      const q=num('s_'+i);
+      const part=e.direct ? q : q*e.c[zona];
+      $('so_'+i).textContent=fmt(part,0);
+      simpleW+=part;
+    });
+
+    // finestre
+    const rows=Array.prototype.slice.call($('wins').querySelectorAll('.dyn-row'));
+    const dominantMode=$('winDominant').checked;
+    // raggruppa per esposizione
+    const grp={};
+    rows.forEach(r=>{
+      const exp=r.querySelector('.w-exp').value, a=numEl(r.querySelector('.w-area'));
+      const cf=WIN.find(w=>w.key===exp).c[zona];
+      grp[exp]=(grp[exp]||0)+a*cf;
+    });
+    let dom=null,mx=-1; for(const e in grp){ if(grp[e]>mx){mx=grp[e];dom=e;} }
+    let winW=0;
+    rows.forEach(r=>{
+      const exp=r.querySelector('.w-exp').value, a=numEl(r.querySelector('.w-area'));
+      const cf=WIN.find(w=>w.key===exp).c[zona];
+      let part, isPt4=false;
+      if(!dominantMode){ part=a*cf; }
+      else if(exp===dom){ part=a*cf; }
+      else { part=a*WIN_PT4[zona]; isPt4=true; }
+      const out=r.querySelector('.w-out');
+      out.textContent=fmt(part,0);
+      out.parentElement.classList.toggle('pt4', isPt4);
+      winW+=part;
+    });
+    $('winDom').textContent = dom ? ('dominante: '+WIN.find(w=>w.key===dom).lbl) : 'dominante: —';
+    $('winDom').style.visibility = dominantMode && dom ? 'visible' : 'hidden';
+
+    // solai
+    const srows=Array.prototype.slice.call($('solai').querySelectorAll('.dyn-row'));
+    let solaiW=0;
+    srows.forEach(r=>{
+      const t=r.querySelector('.sl-type').value, a=numEl(r.querySelector('.sl-area'));
+      const cf=SOLAI.find(s=>s.key===t).c[zona];
+      const part=a*cf;
+      r.querySelector('.sl-out').textContent=fmt(part,0);
+      solaiW+=part;
+    });
+
+    const totW=simpleW+winW+solaiW;
+    const kW=totW/1000;
+    const area=num('g_l')*num('g_w');
+    $('f_w').textContent=fmt(totW,0);
+    $('f_win').textContent=fmt(winW,0);
+    $('f_solai').textContent=fmt(solaiW,0);
+    $('f_kw').textContent=fmt(kW,2);
+    $('f_btu').textContent=fmt(totW*3.41,0);
+    $('f_spec').textContent=area>0?fmt(totW/area,0):'—';
+    $('f_link').textContent=fmt(kW,2);
+    state.fabbisognoKW=kW;
+    if(state.pimpMode==='link'){ $('P_imp').value=+kW.toFixed(2); computePdc(); }
+  }
+
+  /* listeners modulo 1 */
+  ['g_l','g_w','g_h'].forEach(id=> $(id).addEventListener('input',()=>{syncGeo();computeFab();}));
+  SIMPLE.forEach((e,i)=> $('s_'+i).addEventListener('input',()=>{
+    if(e.geo==='floor')dirty.floor=true; if(e.geo==='vol')dirty.vol=true; computeFab();
+  }));
+  $('wins').addEventListener('input', computeFab);
+  $('wins').addEventListener('click', ev=>{ const b=ev.target.closest('.dyn-rm'); if(b){ b.closest('.dyn-row').remove(); computeFab(); } });
+  $('solai').addEventListener('input', computeFab);
+  $('solai').addEventListener('click', ev=>{ const b=ev.target.closest('.dyn-rm'); if(b){ b.closest('.dyn-row').remove(); computeFab(); } });
+  $('addWin').addEventListener('click', ()=>{ addWin('O',10); computeFab(); });
+  $('addSolaio').addEventListener('click', ()=>{ addSolaio('iso',50); computeFab(); });
+  $('winDominant').addEventListener('change', computeFab);
+  $('zona').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(!b)return;
+    zona=+b.dataset.z; Array.prototype.forEach.call($('zona').children,x=>x.setAttribute('aria-pressed',x===b)); computeFab(); });
+  $('toPdc').addEventListener('click', ()=>{ setPimpMode('link'); goStep(2); });
+
+  /* ===================== MODULO 2 ===================== */
+  function setPimpMode(mode){
+    state.pimpMode=mode;
+    Array.prototype.forEach.call($('pimpMode').children,b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+    const inp=$('P_imp');
+    if(mode==='link'){ inp.readOnly=true; inp.value=+state.fabbisognoKW.toFixed(2); $('srcBadge').classList.remove('hide'); }
+    else{ inp.readOnly=false; $('srcBadge').classList.add('hide'); }
+    computePdc();
+  }
+  $('pimpMode').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(b) setPimpMode(b.dataset.m); });
+  function bindToggle(cb,box,lbl,on,off){ function u(){const o=$(cb).checked;$(box).hidden=!o;if(lbl)$(lbl).textContent=o?on:off;computePdc();} $(cb).addEventListener('change',u);u(); }
+  $('tipo').addEventListener('change',function(){ const p=this.value.split('|');
+    $('rangeHint').textContent='Range contenuto: '+p[0].replace('.',',')+'–'+p[1].replace('.',',')+' l/kW';
+    $('unit').value=p[0]; computePdc(); });
+
+  function computePdc(){
+    const P_imp=num('P_imp'), h_imp=num('h_imp');
+    const acs=$('acs').checked;
+    const V_acs=num('V_acs'), T_rete=num('T_rete'), T_uso=num('T_uso');
+    const n_cicli=Math.max(num('n_cicli'),1), t_ciclo=num('t_ciclo');
+    const h_pdc=num('h_pdc'), r_acs=num('r_acs'), n_sbrin=num('n_sbrin');
+    const dT_sb=num('dT_sb'), margine=num('margine');
+    const desurr=$('desurr').checked, r_desurr=num('r_desurr'), unit=num('unit');
+    const E_imp=P_imp*h_imp;
+    const E_acs=acs?V_acs*(T_uso-T_rete)/860:0;
+    const t_eff=acs?Math.min(t_ciclo,24/n_cicli):t_ciclo;
+    const E_acs_ciclo=acs?E_acs/n_cicli:0;
+    const derate=1-n_sbrin/10;
+    const acsPow=(acs&&r_acs>0&&t_eff>0)?E_acs_ciclo/r_acs/t_eff:0;
+    const P_min=(h_pdc>0&&derate>0)?(E_imp/h_pdc+acsPow)/derate:NaN;
+    const P_pdc=P_min*(1+margine/100);
+    const P_des=desurr?P_pdc*r_desurr:0;
+    const V_sbrin=(n_sbrin>0&&dT_sb>0)?0.05*(P_imp+P_pdc)*860/dT_sb:0;
+    const V_term=unit*P_imp, V_req=V_sbrin, V_acc=Math.max(V_req-V_term,0);
+    $('r_pdc').textContent=fmt(P_pdc,1); $('r_acc').textContent=fmt(V_acc,0);
+    $('r_pmin').textContent=fmt(P_min,1); $('r_desurr_out').textContent=fmt(P_des,1);
+    $('r_eimp').textContent=fmt(E_imp,0); $('r_eacs').textContent=fmt(E_acs,1);
+    $('r_vsbrin').textContent=fmt(V_sbrin,0); $('r_vterm').textContent=fmt(V_term,0); $('r_vreq').textContent=fmt(V_req,0);
+    $('row_desurr').classList.toggle('off',!desurr); $('row_eacs').classList.toggle('off',!acs);
+    state.pPdc=P_pdc; state.pAcs=P_pdc*r_acs; state.vTerm=V_term;
+    if(state.paMode==='link'){ $('a_Pacs').value=+(state.pAcs||0).toFixed(2); }
+    if(state.vpMode==='link'){ $('v_P').value=+(state.pPdc||0).toFixed(2); }
+    if(state.vTermMode==='link'){ $('v_term').value=+(state.vTerm||0).toFixed(0); }
+    if(typeof computeAcs==='function') computeAcs();
+    if(typeof computeVolano==='function') computeVolano();
+  }
+  ['h_imp','dT_term','V_acs','T_rete','T_uso','n_cicli','t_ciclo','h_pdc','r_acs','n_sbrin','dT_sb','margine','r_desurr','unit']
+    .forEach(id=>$(id).addEventListener('input',computePdc));
+  $('P_imp').addEventListener('input',()=>{ if(state.pimpMode==='man')computePdc(); });
+  bindToggle('acs','acsBox','acsLbl','Inclusa','Esclusa');
+  bindToggle('desurr','desurrBox','desurrLbl','Presente','Assente');
+
+  /* ===================== MODULO 3 · ACCUMULO ACS ===================== */
+  const UTENZE = [
+    {key:'doccia', lbl:'Doccia',            l:35,  uses:2, def:1},
+    {key:'vasca',  lbl:'Bagno in vasca',    l:100, uses:1, def:0},
+    {key:'lavabo', lbl:'Lavabo',            l:6,   uses:4, def:1},
+    {key:'bidet',  lbl:'Bidet',             l:6,   uses:2, def:1},
+    {key:'lavello',lbl:'Lavello cucina',    l:15,  uses:3, def:1},
+    {key:'altro',  lbl:'Altro',             l:20,  uses:1, def:0},
+  ];
+  function utRow(lbl, n, l, uses){
+    const div=document.createElement('div'); div.className='dyn-row'; div.style.gridTemplateColumns='1fr 78px 92px 80px 30px';
+    div.innerHTML='<span class="e-lbl" style="font-size:12.5px;align-self:center">'+lbl+'</span>'+
+      '<span class="inp"><input class="u-n" type="number" step="1" min="0" value="'+n+'"></span>'+
+      '<span class="inp"><input class="u-l" type="number" step="1" value="'+l+'"></span>'+
+      '<span class="inp"><input class="u-use" type="number" step="0.5" value="'+uses+'"></span>'+
+      '<button class="dyn-rm" title="Rimuovi">×</button>';
+    return div;
+  }
+  UTENZE.forEach(u=>{ $('utenze').appendChild(utRow(u.lbl,u.def,u.l,u.uses)); });
+  $('addUt').addEventListener('click', ()=>{ $('utenze').appendChild(utRow('Apparecchio',1,20,1)); computeAcs(); });
+  $('utenze').addEventListener('input', computeAcs);
+  $('utenze').addEventListener('click', ev=>{ const b=ev.target.closest('.dyn-rm'); if(b){ b.closest('.dyn-row').remove(); computeAcs(); } });
+
+  function setPaMode(mode){
+    state.paMode=mode;
+    Array.prototype.forEach.call($('paMode').children,b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+    const inp=$('a_Pacs');
+    if(mode==='link'){ inp.readOnly=true; inp.value=+(state.pAcs||0).toFixed(2); $('aSrcBadge').classList.remove('hide'); }
+    else{ inp.readOnly=false; $('aSrcBadge').classList.add('hide'); }
+    computeAcs();
+  }
+  $('paMode').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(b) setPaMode(b.dataset.m); });
+  $('a_Pacs').addEventListener('input', ()=>{ if(state.paMode==='man') computeAcs(); });
+  ['a_tp','a_Tuso','a_Trete','a_Tacc','a_eta','a_tpr'].forEach(id=> $(id).addEventListener('input', computeAcs));
+
+  function computeAcs(){
+    const tp=num('a_tp'), Tuso=num('a_Tuso'), Trete=num('a_Trete'), Tacc=num('a_Tacc');
+    const eta=Math.min(Math.max(num('a_eta'),0.1),1), Pacs=num('a_Pacs'), tpr=num('a_tpr');
+    const dUso=Tuso-Trete, dAcc=Tacc-Trete;
+    // prelievo di punta [litri @ Tuso] = Σ n × l/uso × util/h × durata punta
+    let Vp=0;
+    Array.prototype.forEach.call($('utenze').querySelectorAll('.dyn-row'), r=>{
+      const n=numEl(r.querySelector('.u-n')), l=numEl(r.querySelector('.u-l')), us=numEl(r.querySelector('.u-use'));
+      Vp += n*l*us*tp;
+    });
+    const cw=1.163/1000; // kWh per litro per K
+    const Ep = Vp*dUso*cw;                          // energia di punta [kWh]
+    const Egen = Pacs*(tp+tpr);                      // produzione disponibile (punta + preriscaldo) [kWh]
+    const deficit = Math.max(Ep-Egen,0);             // a carico dell'accumulo [kWh]
+    const Vutile = dAcc>0 ? deficit/(dAcc*cw) : 0;    // volume utile a T_acc [litri]
+    const Vacc = eta>0 ? Vutile/eta : 0;             // volume reale preparatore [litri]
+    const taglie=[80,100,150,200,300,400,500,750,800,1000,1500,2000,3000,5000];
+    let comm=taglie.find(t=>t>=Vacc); if(!comm) comm=Math.ceil(Vacc/500)*500;
+    $('a_vp').textContent=fmt(Vp,0);
+    $('a_ep').textContent=fmt(Ep,1);
+    $('a_egen').textContent=fmt(Egen,1);
+    $('a_def').textContent=fmt(deficit,1);
+    $('a_vutile').textContent=fmt(Vutile,0);
+    $('a_vol').textContent=fmt(Vacc,0);
+    $('a_comm').textContent= Vacc>0 ? fmt(comm,0) : '0';
+  }
+
+  /* ===================== MODULO 4 · VOLANO TERMICO ===================== */
+  function setVMode(which, mode){
+    if(which==='p'){ state.vpMode=mode;
+      Array.prototype.forEach.call($('vpMode').children,b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+      const inp=$('v_P');
+      if(mode==='link'){ inp.readOnly=true; inp.value=+(state.pPdc||0).toFixed(2); $('vSrcBadge').classList.remove('hide'); }
+      else{ inp.readOnly=false; $('vSrcBadge').classList.add('hide'); }
+    } else { state.vTermMode=mode;
+      Array.prototype.forEach.call($('vTermMode').children,b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+      const inp=$('v_term');
+      if(mode==='link'){ inp.readOnly=true; inp.value=+(state.vTerm||0).toFixed(0); $('vTermBadge').classList.remove('hide'); }
+      else{ inp.readOnly=false; $('vTermBadge').classList.add('hide'); }
+    }
+    computeVolano();
+  }
+  $('vpMode').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(b) setVMode('p',b.dataset.m); });
+  $('vTermMode').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(b) setVMode('t',b.dataset.m); });
+  $('vType').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(!b)return;
+    vMachineType=b.dataset.t;
+    Array.prototype.forEach.call($('vType').children,x=>x.setAttribute('aria-pressed',x===b));
+    $('vModBox').hidden = (vMachineType!=='inv'); computeVolano(); });
+  function vRunToggle(){ const on=$('v_useRun').checked; $('v_runBox').hidden=!on; $('v_runLbl').textContent=on?'Sì':'No';
+    $('v_runRow').classList.toggle('off',!on); computeVolano(); }
+  $('v_useRun').addEventListener('change', vRunToggle);
+  ['v_P','v_mod','v_nmax','v_dT','v_kmin','v_tmin','v_term','v_pipe'].forEach(id=>$(id).addEventListener('input',()=>{ if((id==='v_P'&&state.vpMode==='link')||(id==='v_term'&&state.vTermMode==='link')) return; computeVolano(); }));
+
+  function computeVolano(){
+    const P=num('v_P'), mod=num('v_mod'), Nmax=Math.max(num('v_nmax'),0.1), dT=num('v_dT');
+    const kmin=num('v_kmin'), useRun=$('v_useRun').checked, tmin=num('v_tmin');
+    const term=num('v_term'), pipe=num('v_pipe');
+    const c=1.163; // Wh/(l·K)
+    const Pmin = (vMachineType==='inv') ? P*mod : P;        // kW
+    const Vpend = (Nmax>0&&dT>0) ? (Pmin*1000)/(4*Nmax*c*dT) : 0;   // l
+    const Vcmin = kmin*P;                                   // l
+    const Vrun  = useRun&&dT>0 ? (Pmin*1000)*(tmin/60)/(c*dT) : 0;   // l
+    let Vreq = Math.max(Vpend, Vcmin); if(useRun) Vreq=Math.max(Vreq,Vrun);
+    const Vsys = term+pipe;
+    const Vinst = Math.max(Vreq - Vsys, 0);
+    const Eutile = Vinst*c*dT/1000;                         // kWh
+    const taglie=[50,80,100,150,200,300,400,500,750,800,1000,1500,2000,3000,5000];
+    let comm=taglie.find(t=>t>=Vinst); if(!comm&&Vinst>0) comm=Math.ceil(Vinst/500)*500;
+    $('v_pmin').textContent=fmt(Pmin,1);
+    $('v_pend').textContent=fmt(Vpend,0);
+    $('v_cmin').textContent=fmt(Vcmin,0);
+    $('v_run').textContent=useRun?fmt(Vrun,0):'—';
+    $('v_req').textContent=fmt(Vreq,0);
+    $('v_sys').textContent=fmt(Vsys,0);
+    $('v_en').textContent=fmt(Eutile,2);
+    $('v_vol').textContent=fmt(Vinst,0);
+    $('v_comm').textContent= Vinst>0 ? fmt(comm,0) : '0';
+    $('v_band').textContent = fmt(P*10,0)+'–'+fmt(P*20,0);
+  }
+
+  /* ===================== NAV ===================== */
+  function goStep(n){
+    Array.prototype.forEach.call(document.querySelectorAll('.module'),m=>m.hidden=(+m.dataset.step!==n));
+    Array.prototype.forEach.call(document.querySelectorAll('.step'),s=>s.setAttribute('aria-selected',+s.dataset.go===n));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-go]'),el=>el.addEventListener('click',()=>goStep(+el.dataset.go)));
+
+  /* init */
+  syncGeo(); computeFab(); setPimpMode('man'); computePdc(); setPaMode('man'); computeAcs(); setVMode('p','man'); setVMode('t','man'); computeVolano();
+})();
+</script>
+</body>
+</html>
