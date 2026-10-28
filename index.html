@@ -661,7 +661,7 @@ table.grid.falde{min-width:620px}
           <div class="card-h"><span class="n">2</span><h2>Parametri di dimensionamento (AiCARR – Vio)</h2></div>
           <div class="card-b">
             <div class="row"><label>Ore di funzionamento PdC<small>nell'arco delle 24 h</small></label><div class="inp"><input id="h_pdc" type="number" step="0.5" value="24"><span class="u">h</span></div></div>
-            <div class="row"><label>Cicli di sbrinamento per ora<small>riduzione di disponibilità = n / 10</small></label><div class="inp"><input id="n_sbrin" type="number" step="1" min="0" value="1"><span class="u">–</span></div></div>
+            <div class="row"><label>Cicli di sbrinamento per ora<small>usato per il volume anti-sbrinamento; sulla taglia non si somma al derating, che lo comprende già</small></label><div class="inp"><input id="n_sbrin" type="number" step="1" min="0" value="1"><span class="u">–</span></div></div>
             <div class="row"><label>Max calo temperatura accumulo<small>per ciclo di sbrinamento</small></label><div class="inp"><input id="dT_sb" type="number" step="0.5" value="4"><span class="u">°C</span></div></div>
             <div class="row"><label>Margine di sicurezza sulla potenza</label><div class="inp"><input id="margine" type="number" step="1" value="0"><span class="u">%</span></div></div>
             <div class="row"><label>Desurriscaldatore<small>recupero per preriscaldo ACS</small></label>
@@ -712,12 +712,12 @@ table.grid.falde{min-width:620px}
       <div class="panel">
         <div class="readout">
           <p class="ro-eyebrow">Risultato dimensionamento</p>
-          <div class="gauge heat"><p class="g-lbl"><span class="dot heat"></span>Potenza richiesta alla PdC in condizioni di progetto</p><div class="g-val"><span id="r_pdc">—</span><span class="un">kW</span></div><div class="g-sub" id="r_cond">—</div></div>
+          <div class="gauge heat"><p class="g-lbl"><span class="dot heat"></span>Potenza richiesta alla PdC in condizioni di progetto (resa integrata)</p><div class="g-val"><span id="r_pdc">—</span><span class="un">kW</span></div><div class="g-sub" id="r_cond">—</div></div>
           <div class="gauge ok"><p class="g-lbl"><span class="dot ok"></span>Taglia nominale minima da cercare a catalogo (A7/W35)</p><div class="g-val"><span id="r_pnreq">—</span><span class="un">kW</span></div><div class="g-sub" id="r_pnsel">—</div></div>
           <div class="gauge water"><p class="g-lbl"><span class="dot water"></span>Volume accumulo da installare</p><div class="g-val"><span id="r_acc">—</span><span class="un">litri</span></div></div>
         </div>
         <div class="sub">
-          <div class="sub-item"><span class="k">Potenza minima, senza margine</span><span class="v"><span id="r_pmin">—</span> <small>kW</small></span></div>
+          <div class="sub-item"><span class="k">Potenza Vio con riduzione per sbrinamento (rese non integrate)</span><span class="v"><span id="r_pmin">—</span> <small>kW</small></span></div>
           <div class="sub-item"><span class="k">Resa della PdC al progetto rispetto al nominale</span><span class="v"><span id="r_capf">—</span> <small>%</small></span></div>
           <div class="sub-item"><span class="k">Potenza della taglia scelta al progetto</span><span class="v"><span id="r_capdes">—</span> <small>kW</small></span></div>
           <div class="sub-item"><span class="k">Temperatura di bivalenza effettiva</span><span class="v"><span id="r_tbiv">—</span> <small>°C</small></span></div>
@@ -1106,9 +1106,10 @@ H = Q_utile / (GG · 24 · f_u)        Φ = H · (θi − θe)</div>
       <div class="formula">θw(θ) = θw,min + (θw,prog − θw,min) · (θlim − θ)/(θlim − θe)        portata = Φ · 860 / ΔT_term</div>
       <h3>Step 04 · Macchina (AiCARR – M. Vio + derating)</h3>
       <div class="formula">P_min = ( E_imp/h_PdC + (E_ACS/n_cicli)/r_ACS/t_ciclo ) / (1 − n_sbrin/10)        P_prog = P_min · (1 + margine)
-P_nom,req = P_prog / f_cap(θe, θw)        [monovalente]
-P_nom,req = P_prog · (θlim − θbiv)/(θlim − θe) / f_cap(θbiv, θw(θbiv))        [bivalente]
+P_nom,req = P_size / f_cap(θe, θw)        [monovalente]        P_size = P_prog · (1 − n_sbrin/10)
+P_nom,req = P_size · (θlim − θbiv)/(θlim − θe) / f_cap(θbiv, θw(θbiv))        [bivalente]
 V_sbrin = 0,05 · (P_imp + P_prog) · 860 / ΔT_sbrin        V_accumulo = max(V_sbrin − c_unit · P_imp ; 0)</div>
+      <p>La taglia usa P_prog · (1 − n_sbrin/10), cioè la potenza senza la riduzione per sbrinamento del metodo Vio: le rese UNI EN 14511 ad A2 e A-7 e la curva generica sono già rese integrate, comprensive degli sbrinamenti. Il valore Vio completo resta per il volume anti-sbrinamento e per i collegamenti degli step 06 e 07.</p>
       <p>f_cap = resa massima / resa nominale A7/W35, interpolata sui punti A-7, A2, A7 a W35 (dati costruttore oppure curva generica <b>ipotesi</b>: 0,85 · 0,92 · 1), corretta per la mandata con −0,5 %/K oltre 35 °C (<b>ipotesi</b>). θbiv effettiva è l'intersezione tra la retta di carico e la curva di potenza della taglia scelta.</p>
       <h3>Step 05 · Risultati stagionali a bin (impostazione UNI EN 14825 / UNI/TS 11300-4)</h3>
       <div class="formula">θm,stag = 20 − GG/N        σ = (θm,stag − θe)/z        ore(θ) = N·24 · pdf normale
@@ -1483,12 +1484,14 @@ const COMUNI=[["Abano Terme","PD",2232,14,-5,2,58],["Abbadia Cerreto","LO",2443,
     const acsPow=(acs&&r_acs>0&&t_eff>0)?(E_acs/n_cicli)/r_acs/t_eff:0;
     const P_min=(h_pdc>0&&derate>0)?(E_imp/h_pdc+acsPow)/derate:NaN;
     const P_prog=P_min*(1+margine/100);
+    // rese EN 14511 (e curva generica) sono integrate: includono già gli sbrinamenti → per la taglia si toglie la riduzione Vio
+    const P_size=P_prog*(derate>0?derate:1);
     const Te=num('c_Te'), Tlim=num('c_Tlim'), TwD=num('Tw_des');
     const biv=$('biv').value, Tb_t=num('Tbiv_t'), cooling=state.pimpMode==='freddo';
-    const loadV=T=> T>=Tlim?0:P_prog*(Tlim-T)/Math.max(Tlim-Te,0.1);
+    const loadV=T=> T>=Tlim?0:P_size*(Tlim-T)/Math.max(Tlim-Te,0.1);
     state.Pn=state.Pn||12;
     let M=machine(), Tref=Te;
-    const req=()=> cooling? P_prog/Math.max(num('r_fr'),0.3) : (biv==='mono'? P_prog/M.capF(Te,TwD) : loadV(Tref)/M.capF(Tref,twCurve(Tref)));
+    const req=()=> cooling? P_size/Math.max(num('r_fr'),0.3) : (biv==='mono'? P_size/M.capF(Te,TwD) : loadV(Tref)/M.capF(Tref,twCurve(Tref)));
     if(!cooling&&biv!=='mono') Tref=clamp(Tb_t,Te,Tlim-1);
     let PnReq=req();
     if(state.tagMode==='auto'){
@@ -1502,17 +1505,17 @@ const COMUNI=[["Abano Terme","PD",2232,14,-5,2,58],["Abbadia Cerreto","LO",2443,
     if(!cooling){ for(let T=Tlim;T>=Te-15;T-=0.1){ const on=(M.src!=='air'||T>=M.TOL); const cap=on?Pn*M.capF(T,twCurve(T)):0; if(cap<loadV(T)){ Tbiv=T; break; } } }
     let Pint=0;
     if(!cooling){ const capAtTe=(M.src!=='air'||Te>=M.TOL)?capDes:0;
-      Pint=(biv==='alt'&&Tbiv!==null&&Te<Tbiv)?P_prog:Math.max(P_prog-capAtTe,0); }
+      Pint=(biv==='alt'&&Tbiv!==null&&Te<Tbiv)?P_size:Math.max(P_size-capAtTe,0); }
     const P_des=desurr?P_prog*r_desurr:0;
     const V_sbrin=(n_sbrin>0&&dT_sb>0)?0.05*(P_imp+P_prog)*860/dT_sb:0;
     const V_term=unit*P_imp, V_req=V_sbrin, V_acc=Math.max(V_req-V_term,0);
     state.PnReq=PnReq; state.Pint=Pint; state.Vacc_sb=V_acc; state.Pdesurr=P_des;
     state.Pprog=P_prog; state.pAcs=P_prog*r_acs; state.Vsbrin=V_sbrin; state.vTerm=V_term; state.Tbiv=Tbiv; state.hp=M;
-    $('r_pdc').textContent=fmt(P_prog,1);
+    $('r_pdc').textContent=fmt(P_size,1);
     $('r_cond').textContent=cooling?'Dimensionamento sul carico di raffrescamento (A35/W7)':('a θe '+fmt(Te,1)+' °C e mandata '+fmt(TwD,0)+' °C');
     $('r_pnreq').textContent=fmt(PnReq,1);
     $('r_pnsel').textContent=(state.tagMode==='auto'?'Taglia commerciale proposta: ':'Taglia scelta: ')+fmt(Pn,1)+' kW';
-    $('r_pmin').textContent=fmt(P_min,1);
+    $('r_pmin').textContent=fmt(P_prog,1);
     $('r_capf').textContent=cooling?'—':fmt(capF*100,0);
     $('r_capdes').textContent=cooling?'—':fmt(capDes,1);
     $('r_tbiv').textContent=cooling?'—':(Tbiv===null?'nessuna':fmt(Tbiv,1));
@@ -1532,8 +1535,8 @@ const COMUNI=[["Abano Terme","PD",2232,14,-5,2,58],["Abbadia Cerreto","LO",2443,
       if(biv!=='mono'&&Tbiv!==null&&Tbiv>2) al.push(['w','θ di bivalenza effettiva alta ('+fmt(Tbiv,1)+' °C): l\'integrazione lavorerebbe per molte ore. Verifica la quota di copertura nello step 05.']);
       const Pmod=Pn*num('mod')*M.capF(7,twCurve(7)), L7=loadV(7);
       if(Pmod>L7&&L7>0) al.push(['i','A 7 °C esterni il carico ('+fmt(L7,1)+' kW) è inferiore alla potenza minima modulata ('+fmt(Pmod,1)+' kW): la macchina lavorerà a cicli nelle mezze stagioni (vedi il volano, step 07).']);
-      if(capDes>1.5*P_prog&&P_prog>0) al.push(['w','La taglia scelta al progetto rende il '+fmt(capDes/P_prog*100,0)+' % del richiesto: è sovradimensionata, con più pendolazioni e un SCOP più basso.']);
-      if(n_sbrin>0&&M.src==='air'&&Te>-8&&Te<7) al.push(['i','Le rese di catalogo secondo EN 14511 (e la curva generica) includono già gli sbrinamenti. Con anche n_sbrin > 0 la riduzione viene contata due volte, a favore di sicurezza.']);
+      if(capDes>1.5*P_size&&P_size>0) al.push(['w','La taglia scelta al progetto rende il '+fmt(capDes/P_size*100,0)+' % del richiesto: è sovradimensionata, con più pendolazioni e un SCOP più basso.']);
+      if(acs&&P_imp>0&&acsPow*(1)>0.15*P_imp) al.push(['i','La quota ACS aggiunge '+fmt(acsPow,1)+' kW al carico di progetto (metodo Vio, ACS contemporanea al riscaldamento). Con precedenza ACS e bollitore adeguato (step 06) questa quota si può ridurre: verifica con il profilo di prelievo reale.']);
     } else al.push(['i','Dimensionamento sul freddo: derating e bivalenza invernali non sono applicati. Verifica comunque la copertura invernale impostando "Caldo".']);
     if(state.Pcool>0&&Pfr<state.Pcool) al.push(['w','In raffrescamento la resa stimata ('+fmt(Pfr,1)+' kW) è inferiore al carico freddo ('+fmt(state.Pcool,1)+' kW).']);
     $('p_alerts').innerHTML=alertsHTML(al);
