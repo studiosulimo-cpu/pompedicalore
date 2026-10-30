@@ -396,10 +396,10 @@ table.grid.falde{min-width:620px}
             <div class="row"><label>Temperatura esterna di progetto θe<small>UNI EN 12831-1 · dato del comune</small></label><div class="inp"><input id="c_Te" type="number" step="0.5" value="-5"><span class="u">°C</span></div></div>
             <div class="row"><label>Temperatura interna di progetto θi</label><div class="inp"><input id="c_Ti" type="number" step="0.5" value="20"><span class="u">°C</span></div></div>
             <div class="row"><label>Gradi giorno<small>DPR 412/93 All. A, base 20 °C</small></label><div class="inp"><input id="c_GG" type="number" step="10" value="2550"><span class="u">GG</span></div></div>
-            <div class="row"><label>Durata stagione di riscaldamento<small>DPR 412/93 · zona F senza limiti (ipotesi 200 g)</small></label><div class="inp"><input id="c_N" type="number" step="1" value="183"><span class="u">giorni</span></div></div>
+            <div class="row"><label>Durata stagione di riscaldamento<small>DPR 74/2013 art. 4 · zona F senza limiti (ipotesi 200 g)</small></label><div class="inp"><input id="c_N" type="number" step="1" value="183"><span class="u">giorni</span></div></div>
             <div class="row"><label>Temperatura media annua esterna θm,e<small>serve per il pavimento su terreno</small></label><div class="inp"><input id="c_Tm" type="number" step="0.5" value="12"><span class="u">°C</span></div></div>
             <div class="row"><label>Temperatura limite di riscaldamento<small>sopra non c'è carico (EN 14825: 16 °C)</small></label><div class="inp"><input id="c_Tlim" type="number" step="0.5" value="16"><span class="u">°C</span></div></div>
-            <div class="hint">Selezionando il comune, <b>GG e zona</b> vengono dal DPR 412/93 (Allegato A). <b>θe</b> è calcolata dalla temperatura di progetto del capoluogo (UNI 5364 / DM 27/7/2005) con −1 °C ogni 200 m di quota in più (<b>probabile</b>, criterio usuale della UNI 10349): se il termotecnico ha un θe diverso, sovrascrivilo. Durata della stagione dalla zona; θm,e stimata dai GG (<b>ipotesi</b>).</div>
+            <div class="hint">Selezionando il comune, <b>GG e zona</b> vengono dal DPR 412/93 (Allegato A). <b>θe</b> è calcolata dalla temperatura di progetto storica del capoluogo (UNI 5364, ripresa dal DPR 1052/77) con −1 °C ogni 200 m di quota in più (<b>probabile</b>). Il dato di progetto aggiornato è nella UNI/TR 10349-2:2016: se il termotecnico usa quello, sovrascrivilo. Durata della stagione dalla zona; θm,e stimata dai GG (<b>ipotesi</b>).</div>
           </div>
         </section>
       </div>
@@ -958,6 +958,9 @@ table.grid.falde{min-width:620px}
               <div class="row wide"><label>Tipo di macchina</label><div class="inp"><select data-of="tipoMacc">
                 <option value="mono">Monoblocco (circuito frigorifero sigillato)</option><option value="split">Split idronico (modulo interno + unità esterna)</option>
               </select></div></div>
+              <div class="row wide"><label>Refrigerante<small>Reg. UE 2024/573: limiti GWP dal 1/1/2027</small></label><div class="inp"><select data-of="refr">
+                <option value="R290">R290 (propano, GWP 3)</option><option value="R32">R32 (GWP 675)</option><option value="R454C">R454C (GWP 148)</option><option value="R410A">R410A (GWP 2088)</option>
+              </select></div></div>
               <div class="row wide"><label>Posizione unità esterna</label><div class="inp"><select data-of="posEst">
                 <option value="terra">A terra su basamento</option><option value="staffe">A parete su staffe</option><option value="tetto">Su tetto o terrazzo (sollevamento)</option>
               </select></div></div>
@@ -979,6 +982,8 @@ table.grid.falde{min-width:620px}
               <div class="row wide"><label>Collegamento volano</label><div class="inp"><select data-of="volConn"><option value="4t">A 4 attacchi (separatore idraulico) + circolatore secondario</option><option value="2t">A 2 attacchi in serie sul ritorno</option></select></div></div>
               <div class="row"><label>Miscelatrice termostatica ACS e gruppo di sicurezza</label><label class="sw"><input data-of="misc" type="checkbox" checked><span class="track"></span><span class="lbl">Sì</span></label></div>
               <div class="row"><label>Lavaggio impianto esistente e trattamento acqua<small>UNI 8065</small></label><label class="sw"><input data-of="lavaggio" type="checkbox" checked><span class="track"></span><span class="lbl">Sì</span></label></div>
+              <div class="row"><label>Valvole termostatiche a bassa inerzia termica<small>DM 28/10/2025: obbligo con nuovo generatore a PdC, salvo regolazione equivalente esistente</small></label><div class="inp"><select data-of="vtOn"><option value="auto">Automatico (sì con radiatori)</option><option value="si">Sì</option><option value="no">No (regolazione già presente)</option></select></div></div>
+              <div class="row"><label>Corpi scaldanti da dotare di valvola</label><div class="inp"><input data-of="nVt" type="number" step="1" value="8"><span class="u">n.</span></div></div>
               <div class="row"><label>Cronotermostato / regolazione ambiente</label><div class="inp"><input data-of="nCrono" type="number" step="1" value="1"><span class="u">n.</span></div></div>
               <div class="row"><label>Opere edili<small>basamento, tracce, ripristini</small></label><div class="inp"><input data-of="edi" type="number" step="10" value="0"><span class="u">€</span></div></div>
             </div>
@@ -987,7 +992,7 @@ table.grid.falde{min-width:620px}
             <div class="card-h"><span class="n">D</span><h2>Pratiche e professionisti</h2></div>
             <div class="card-b">
               <div class="row"><label>Progetto da professionista<small>obbligatorio sopra 40.000 frigorie/h (DM 37/08 art. 5)</small></label><div class="inp"><select data-of="prog"><option value="auto">Automatico</option><option value="si">Sì</option><option value="no">No</option></select></div></div>
-              <div class="row"><label>Relazione tecnica requisiti minimi<small>DM 26/06/2015 · sostituzione del generatore</small></label><label class="sw"><input data-of="rel" type="checkbox" checked><span class="track"></span><span class="lbl">Sì</span></label></div>
+              <div class="row"><label>Relazione tecnica requisiti minimi<small>DM 28/10/2025: esente solo la sostituzione &lt; 50 kW senza cambio di tipologia di generatore</small></label><div class="inp"><select data-of="rel"><option value="auto">Automatica</option><option value="si">Sì</option><option value="no">No</option></select></div></div>
               <div class="row"><label>Pratica Conto Termico (GSE)</label><label class="sw"><input data-of="praCT" type="checkbox" checked><span class="track"></span><span class="lbl">Sì</span></label></div>
               <div class="row"><label>Libretto e catasto impianti termici<small>DPR 74/2013</small></label><label class="sw"><input data-of="cit" type="checkbox" checked><span class="track"></span><span class="lbl">Sì</span></label></div>
             </div>
@@ -1055,11 +1060,12 @@ table.grid.falde{min-width:620px}
                 <option value="ww35">Acqua/acqua · W35</option><option value="ww55">Acqua/acqua · W55</option>
                 <option value="gw35">Geotermica salamoia/acqua · W35</option><option value="gw55">Geotermica salamoia/acqua · W55</option>
               </select></div></div>
-              <div class="row"><label>Potenza termica nominale Prated<small>vuoto = taglia scelta allo step 04</small></label><div class="inp"><input data-of="ctP" type="number" step="0.1" placeholder="auto"><span class="u">kW</span></div></div>
+              <div class="row"><label>Potenza termica Prated della scheda ErP<small>clima medio (−10 °C), alla temperatura di applicazione · vuoto = stima dalla curva della macchina</small></label><div class="inp"><input data-of="ctP" type="number" step="0.1" placeholder="auto"><span class="u">kW</span></div></div>
               <div class="row"><label>SCOP dichiarato (clima medio)<small>dalla scheda di prodotto · vuoto = valore tipico della classe</small></label><div class="inp"><input data-of="ctScop" type="number" step="0.01" placeholder="tipico"><span class="u">–</span></div></div>
               <div class="row"><label>ηs dichiarato (clima medio)<small>vuoto = valore tipico della classe</small></label><div class="inp"><input data-of="ctEta" type="number" step="1" placeholder="tipico"><span class="u">%</span></div></div>
               <div class="row"><label>Percentuale massima sulla spesa</label><div class="inp"><input data-of="ctPct" type="number" step="1" value="65"><span class="u">%</span></div></div>
-              <div class="hint">Formula del DM 7/8/2025 (Titolo III, intervento III.A): I = Prated · Quf · (1 − 1/SCOP) · (ηs/ηs,min) · Ci per anno, con Quf della zona climatica e Ci per fascia di potenza (≤ 35 kW: 2 annualità; oltre: 5), entro la percentuale massima della spesa. Motore allineato al tool Conto Termico, validato sugli esempi GSE (5.068,80 € e 2.748 €). Stima non vincolante: l'importo è determinato dal GSE.</div>
+              <div class="row wide"><label>Confronto con la detrazione fiscale<small>alternativa al Conto Termico sulla stessa spesa</small></label><div class="inp"><select data-of="detr"><option value="princ">Abitazione principale (50 %)</option><option value="altra">Altra unità (36 %)</option><option value="no">Non mostrare</option></select></div></div>
+              <div class="hint">Formula del DM 7/8/2025 (Titolo III, intervento III.A): I = Prated · Quf · (1 − 1/SCOP) · (ηs/ηs,min) · Ci per anno, con Quf della zona climatica e Ci per fascia di potenza (≤ 35 kW: 2 annualità; oltre: 5), entro la percentuale massima della spesa. Motore allineato al tool Conto Termico, validato sugli esempi GSE (5.068,80 € e 2.748 €). Domanda entro 90 giorni dalla conclusione dei lavori; incentivo fino a 15.000 € in un'unica rata. Il decreto correttivo del MASE (intesa in Conferenza Unificata del 22/10/2026) non è ancora in Gazzetta: le regole restano quelle del DM 7/8/2025. Stima non vincolante: l'importo è determinato dal GSE.</div>
             </div>
           </section>
         </div>
@@ -1076,6 +1082,7 @@ table.grid.falde{min-width:620px}
           <div class="sub-item"><span class="k">Margine sul prezzo netto · ricarico</span><span class="v"><span id="o_margin">—</span> · <span id="o_markup">—</span> <small>%</small></span></div>
           <div class="sub-item"><span class="k">Utile lordo</span><span class="v"><span id="o_profit">—</span> <small>€</small></span></div>
           <div class="sub-item"><span class="k">Ore di lavoro · giorni di cantiere</span><span class="v"><span id="o_hours">—</span> · <span id="o_days">—</span></span></div>
+          <div class="sub-item"><span class="k">In alternativa: detrazione fiscale in 10 anni</span><span class="v"><span id="o_detr">—</span> <small>€</small></span></div>
           <div class="sub-item"><span class="k">Costo netto per il cliente dopo il CT</span><span class="v"><span id="o_netcli">—</span> <small>€</small></span></div>
           <div class="sub-item"><span class="k">Risparmio annuo stimato (step 05)</span><span class="v"><span id="o_sav">—</span> <small>€</small></span></div>
           <div class="sub-item"><span class="k">Rientro semplice dopo il CT</span><span class="v"><span id="o_pb">—</span> <small>anni</small></span></div>
@@ -1116,7 +1123,7 @@ V_sbrin = 0,05 · (P_imp + P_prog) · 860 / ΔT_sbrin        V_accumulo = max(V_
 COP(θ,θw) = η_C(θ) · (θw+3+273,15) / ((θw+3) − (θ−5))        η_C calibrato sui COP di targa
 COP_bin = COP · CR / (Cd·CR + 1 − Cd)        se il carico scende sotto la potenza minima modulata
 SCOP = Σ Q_PdC / Σ E_el        ηs ≈ 100·SCOP/2,5 − 3 %</div>
-      <p>Classi ErP: Reg. UE 811/2013 per bassa (35 °C) e media temperatura (55 °C). Minimi Ecodesign del Reg. UE 813/2013: ηs ≥ 125 % a bassa e ≥ 110 % a media temperatura. ηs e classe sono <b>stime</b> sul clima del sito, non i valori di etichetta.</p>
+      <p>Classi ErP: Reg. UE 811/2013 per bassa (35 °C) e media temperatura (55 °C). La revisione dei Reg. 811 e 813/2013 (nuova etichetta A–G) è in corso e non ancora adottata: valgono le regole attuali. Dal 3/6/2026 il DM 28/10/2025 rinvia ai minimi Ecodesign per le pompe di calore di ogni taglia, senza più tabelle nazionali di COP. Minimi Ecodesign del Reg. UE 813/2013: ηs ≥ 125 % a bassa e ≥ 110 % a media temperatura. ηs e classe sono <b>stime</b> sul clima del sito, non i valori di etichetta.</p>
       <h3>Step 06 · Accumulo ACS (UNI 9182, App. G)</h3>
       <div class="formula">V_punta = Σ (n · l/utilizzo · utilizzi/h) · t_punta        E_punta = V_punta · (T_uso − T_rete) · 1,163/1000
 V_acc = max(E_punta − P_ACS·(t_punta + t_pre) ; 0) · 1000 / (1,163 · (T_acc − T_rete)) / η_strat</div>
@@ -1125,8 +1132,9 @@ V_acc = max(E_punta − P_ACS·(t_punta + t_pre) ; 0) · 1000 / (1,163 · (T_acc
       <div class="formula">anti-pendolazione:  V = P_min,compr / (4 · N_max · 1,163 · ΔT)        contenuto minimo:  V = k · P_PdC
 tempo minimo (opz.):  V = P_min,compr · t_min / (1,163 · ΔT)        V_installare = max(criteri) − acqua_impianto</div>
       <h3>Step 08 · Offerta</h3>
+      <p>Requisiti e obblighi applicati: relazione tecnica (D.Lgs. 192/2005 art. 8, DM 28/10/2025: esente solo la sostituzione &lt; 50 kW senza cambio di tipologia), valvole termostatiche a bassa inerzia con nuovo generatore a pompa di calore (DM 28/10/2025), progetto oltre 40.000 frigorie/h (DM 37/08 art. 5), limiti GWP del Reg. UE 2024/573 (monoblocchi fino a 50 kW e split aria-acqua fino a 12 kW con GWP &lt; 150 dal 1/1/2027), controllo di efficienza energetica per pompe di calore da 12 kW (DPR 74/2013). Conto Termico: domanda entro 90 giorni dalla fine lavori, rata unica fino a 15.000 €, correttivo MASE in corso. Detrazione alternativa: 50 % abitazione principale e 36 % altre unità nel 2026, limite di detrazione 30.000 €.</p>
       <p>Computo generato dai dimensionamenti degli step precedenti, con prezzi dal listino personale (default indicativi da sostituire). Prezzo = costo × (1 + trasporto sui materiali) × (1 + imprevisti) × (1 + ricarico); sicurezza a costo senza ricarico, professionisti passanti. IVA: 10 % per manutenzione straordinaria residenziale con la pompa di calore come bene significativo (DM 29/12/1999; eccedenza al 22 %), oppure 10 % o 22 % su tutto; prestazioni professionali e pratiche al 22 % (<b>probabile</b>, da confermare con il commercialista). Conto Termico 3.0: I = Prated · Quf · (1 − 1/SCOP) · ηs/ηs,min · Ci per anno, 2 annualità fino a 35 kW e 5 oltre, entro la percentuale massima della spesa.</p>
-      <div class="disclaimer">Strumento di pre-dimensionamento per stime di prima approssimazione. Riferimenti: UNI EN 12831-1:2018, UNI 10349, UNI 5364 e DPR 412/93 (dati climatici), AiCARR – M. Vio (potenza e contenuto d'acqua), UNI EN 14511 e UNI EN 14825 (prestazioni e metodo a bin), UNI/TS 11300-4, Reg. UE 811/2013 e 813/2013, UNI 9182 (ACS), bozza di appendice nazionale UNI EN 12831-3. Step 07 su criterio anti-pendolazione e contenuto minimo del costruttore, con riscontro sulla regola pratica 10–20 l/kW. Il metodo speditivo, le curve generiche e la distribuzione climatica sono ipotesi tecniche modificabili. Non sostituisce il progetto del termotecnico né la verifica del costruttore. L'utilizzatore è l'unico responsabile della congruità dei risultati.</div>
+      <div class="disclaimer">Strumento di pre-dimensionamento per stime di prima approssimazione. Riferimenti aggiornati al 30/10/2026: UNI EN 12831-1:2018, UNI 10349-1:2016 e UNI/TR 10349-2:2016, UNI 5364 (storica), DPR 412/93 All. A e DPR 74/2013 (dati climatici e periodi), D.Lgs. 192/2005 e DM 28/10/2025 (requisiti minimi), AiCARR – M. Vio (potenza e contenuto d'acqua), UNI EN 14511 e UNI EN 14825 (prestazioni e metodo a bin), UNI/TS 11300-4, Reg. UE 811/2013 e 813/2013 (revisione in corso), Reg. UE 2024/573 (F-gas), DM 37/08, CEI 64-8:2024, DPR 74/2013, DM 7/8/2025 (Conto Termico 3.0), UNI 9182 (ACS), bozza di appendice nazionale UNI EN 12831-3, Linee guida legionellosi 2015 e D.Lgs. 18/2023. Step 07 su criterio anti-pendolazione e contenuto minimo del costruttore, con riscontro sulla regola pratica 10–20 l/kW. Il metodo speditivo, le curve generiche e la distribuzione climatica sono ipotesi tecniche modificabili. Non sostituisce il progetto del termotecnico né la verifica del costruttore. L'utilizzatore è l'unico responsabile della congruità dei risultati.</div>
     </div>
   </details>
   <footer>Calcolo client-side · nessun dato trasmesso · deployabile su GitHub Pages</footer>
@@ -1797,12 +1805,13 @@ const today = () => new Date().toLocaleDateString('it-IT');
 /* ---------------- stato persistente ---------------- */
 const LSK = 'pdcTool.v1';
 const OF0 = { cliente: '', indirizzo: '', soggetto: 'priv', sost: true, smont: 'mur', canna: false, tipoMacc: 'mono', posEst: 'terra', mIdr: 8, nCar: 1, gelo: 'valv', mEl: 15, fase: 'auto', spd: false,
-  acsOn: true, acsL: '', volOn: true, volL: '', volConn: '4t', misc: true, lavaggio: true, nCrono: 1, edi: 0, prog: 'auto', rel: true, praCT: true, cit: true,
+  acsOn: true, acsL: '', volOn: true, volL: '', volConn: '4t', misc: true, lavaggio: true, nCrono: 1, edi: 0, prog: 'auto', rel: 'auto', praCT: true, cit: true, refr: 'R290', vtOn: 'auto', nVt: 8, detr: 'princ',
   pMacc: '', costH: '', squadra: 2, transport: 3, contingency: 5, priceMode: 'markup', markup: 30, priceGross: '', ivaMode: 'bs', bsBase: 'cost',
   azienda: '', tecnico: '', pagamento: '40% all\'ordine, 50% a consegna materiali, 10% a fine lavori', tempi: 'Entro 30 giorni dall\'ordine, salvo disponibilità della macchina', garanzia: 'Garanzia del costruttore sulla macchina; 24 mesi sull\'installazione', validita: 30,
   ctOn: true, ctTipo: 'auto', ctP: '', ctScop: '', ctEta: '', ctPct: 65 };
 let DB = { of: Object.assign({}, OF0), ov: {}, listino: {}, inputs: null, created: Date.now(), id: Math.random().toString(36).slice(2, 6) };
 try { const s = JSON.parse(localStorage.getItem(LSK) || 'null'); if (s) { DB = Object.assign(DB, s); DB.of = Object.assign({}, OF0, s.of || {}); DB.ov = s.ov || {}; DB.listino = s.listino || {}; } } catch (e) { }
+const fixOld = o => { if (o.rel === true) o.rel = 'auto'; if (o.rel === false) o.rel = 'no'; return o; }; fixOld(DB.of);
 let saveT = null;
 function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { DB.inputs = snapshotInputs(); localStorage.setItem(LSK, JSON.stringify(DB)); } catch (e) { } }, 300); }
 
@@ -1857,6 +1866,7 @@ const CATALOG = [
   ['Elettrico e regolazione', 'spd3', 'SPD tipo 2 3P+N', '€', 140],
   ['Elettrico e regolazione', 'quadretto', 'Quadretto IP65 a bordo macchina con sezionatore', '€', 55],
   ['Elettrico e regolazione', 'crono', 'Cronotermostato / sonda ambiente', '€', 110],
+  ['Elettrico e regolazione', 'vt', 'Testa termostatica a bassa inerzia con corpo valvola (fornita e posata)', '€/pz', 38],
   ['Smontaggi e opere', 'smont.mur', 'Smontaggio caldaia murale', '€', 220],
   ['Smontaggi e opere', 'smont.bas', 'Smontaggio caldaia a basamento e bruciatore', '€', 550],
   ['Smontaggi e opere', 'smont.pdc', 'Smontaggio pompa di calore esistente con recupero gas', '€', 400],
@@ -1883,7 +1893,7 @@ const CATALOG = [
   ['Sicurezza', 'sic_day', 'Oneri della sicurezza: per giorno di lavoro', '€/gg', 15],
   ['Professionisti e pratiche', 'prog_base', 'Progetto impianto termico (professionista esterno): quota fissa', '€', 700],
   ['Professionisti e pratiche', 'prog_kw', 'Progetto impianto termico: quota per kW', '€/kW', 12],
-  ['Professionisti e pratiche', 'rel', 'Relazione tecnica requisiti minimi (DM 26/06/2015)', '€', 350],
+  ['Professionisti e pratiche', 'rel', 'Relazione tecnica requisiti minimi (D.Lgs. 192/2005 art. 8 · DM 28/10/2025)', '€', 350],
   ['Professionisti e pratiche', 'praCT', 'Pratica Conto Termico sul Portaltermico GSE', '€', 250],
   ['Professionisti e pratiche', 'cit', 'Libretto di impianto e registrazione al catasto impianti termici', '€', 90]
 ].map(([group, key, label, um, def]) => ({ group, key, label, um, def }));
@@ -1955,6 +1965,13 @@ function sizing() {
   // progetto obbligatorio: impianti di climatizzazione ≥ 40.000 frigorie/h (≈ 46,5 kW)
   z.progObb = Pn * num('r_fr') >= 46.5 || Pn >= 46.5;
   z.progOn = O.prog === 'si' || (O.prog === 'auto' && z.progObb);
+  // relazione tecnica (D.Lgs. 192/2005 art. 8, DM 28/10/2025): esente solo la sostituzione < 50 kW senza cambio di tipologia di generatore
+  z.relObb = !(O.sost && O.smont === 'pdc' && Pn < 50);
+  z.relOn = O.rel === 'si' || (O.rel === 'auto' && z.relObb);
+  const radiators = /Radiatori/.test($('tipo').options[$('tipo').selectedIndex].text);
+  z.vtOn = O.vtOn === 'si' || (O.vtOn === 'auto' && radiators);
+  z.radiators = radiators;
+  const GWP = { R290: 3, R32: 675, R454C: 148, R410A: 2088 }; z.gwp = GWP[O.refr] || 0;
   z.cooling = cooling;
   return z;
 }
@@ -1972,7 +1989,7 @@ function build(z) {
   const Pn = z.Pn, srcLbl = { air: 'aria-acqua', wat: 'acqua-acqua', gnd: 'geotermica salamoia-acqua' }[z.src];
   // generatore
   const pAuto = z.src === 'air' ? LP('pdc.air.base') + LP('pdc.air.kw') * Pn : z.src === 'wat' ? LP('pdc.wat.base') + LP('pdc.wat.kw') * Pn : LP('pdc.gnd.base') + LP('pdc.gnd.kw') * Pn;
-  add(C.GEN, 'pdc', `Pompa di calore ${srcLbl} ${O.tipoMacc === 'split' && z.src === 'air' ? 'split idronica' : 'monoblocco'} da ${nf(Pn, 1)} kW nominali (A7/W35), mandata fino a ${nf(num('Tw_max'), 0)} °C, con regolazione climatica e sonda esterna`, 1, 'pz', O.pMacc > 0 ? +O.pMacc : pAuto, { mat: true, bs: true, norm: 'UNI EN 14511 · UNI EN 14825 · Reg. UE 813/2013 e 811/2013 · CEI EN 60335-2-40', tag: 'PdC' });
+  add(C.GEN, 'pdc', `Pompa di calore ${srcLbl} ${O.tipoMacc === 'split' && z.src === 'air' ? 'split idronica' : 'monoblocco'} da ${nf(Pn, 1)} kW nominali (A7/W35), refrigerante ${O.refr}, mandata fino a ${nf(num('Tw_max'), 0)} °C, con regolazione climatica e sonda esterna`, 1, 'pz', O.pMacc > 0 ? +O.pMacc : pAuto, { mat: true, bs: true, norm: 'UNI EN 14511 · UNI EN 14825 · Reg. UE 813/2013 e 811/2013 · CEI EN 60335-2-40 · Reg. UE 2024/573', tag: 'PdC' });
   if (z.src === 'air' && O.tipoMacc === 'split') { add(C.GEN, 'split', 'Modulo idronico interno e kit di collegamento (split)', 1, 'a corpo', LP('pdc.split.extra'), { mat: true, bs: true }); add(C.GEN, 'splitl', 'Linea frigorifera di collegamento', (+O.mIdr || 0), 'm', LP('pdc.split.linea'), { mat: true }); add(C.GEN, 'fgas', 'Vuoto, carica refrigerante e registrazione nella banca dati F-gas', 1, 'a corpo', LP('pdc.split.fgas'), { vcat: 'imp', ref: 'Reg. UE 2024/573 · DPR 146/2018' }); }
   if (z.src === 'wat') add(C.GEN, 'pozzi', 'Pozzi di presa e resa con pompa sommersa (stima, da verificare con indagine idrogeologica e autorizzazione)', 1, 'a corpo', LP('pdc.wat.pozzi'), { vcat: 'edi' });
   if (z.src === 'gnd') add(C.GEN, 'sonde', 'Sonde geotermiche verticali perforate, posate e cementate (stima)', Math.ceil(Pn * LP('pdc.gnd.mkw')), 'm', LP('pdc.gnd.sonda'), { vcat: 'edi' });
@@ -2007,6 +2024,7 @@ function build(z) {
   if (O.spd) add(C.ELE, 'spd', `SPD tipo 2 ${z.ph === 3 ? '3P+N' : '1P+N'}`, 1, 'pz', LP(z.ph === 3 ? 'spd3' : 'spd1'), { mat: true, norm: 'CEI EN 61643-11' });
   add(C.ELE, 'quadretto', 'Quadretto IP65 a bordo macchina con sezionatore', 1, 'pz', LP('quadretto'), { mat: true, norm: 'CEI EN 61439-3 · CEI EN 60947-3' });
   add(C.ELE, 'crono', 'Cronotermostato / sonda ambiente', +O.nCrono || 0, 'pz', LP('crono'), { mat: true });
+  if (z.vtOn) add(C.ELE, 'vt', 'Valvole termostatiche a bassa inerzia termica sui corpi scaldanti', +O.nVt || 0, 'pz', LP('vt'), { mat: true, norm: 'UNI EN 215', ref: 'DM 28/10/2025 · Allegato 1', tag: 'VT' });
   // smontaggi
   if (O.smont === 'mur') add(C.SMO, 'smont', 'Smontaggio della caldaia murale esistente e chiusura degli attacchi', 1, 'a corpo', LP('smont.mur'));
   if (O.smont === 'bas') add(C.SMO, 'smont', 'Smontaggio della caldaia a basamento e del bruciatore', 1, 'a corpo', LP('smont.bas'));
@@ -2031,7 +2049,7 @@ function build(z) {
   // pratiche e professionisti
   if (O.cit) add(C.PRA, 'cit', 'Libretto di impianto e registrazione al catasto regionale degli impianti termici', 1, 'a corpo', LP('cit'), { vcat: 'prat', ref: 'DPR 74/2013 · DM 10/02/2014' });
   if (O.praCT) add(C.PRA, 'praCT', 'Predisposizione e invio della pratica Conto Termico sul Portaltermico GSE', 1, 'a corpo', LP('praCT'), { vcat: 'prat', ref: 'DM 7/8/2025' });
-  if (O.rel) add(C.PRO, 'rel', 'Relazione tecnica sul rispetto dei requisiti minimi (professionista esterno)', 1, 'a corpo', LP('rel'), { vcat: 'prof', pass: true, ref: 'DM 26/06/2015 · D.Lgs. 192/2005' });
+  if (z.relOn) add(C.PRO, 'rel', 'Relazione tecnica sul rispetto dei requisiti minimi (professionista esterno)', 1, 'a corpo', LP('rel'), { vcat: 'prof', pass: true, ref: 'D.Lgs. 192/2005 art. 8 · DM 28/10/2025' });
   if (z.progOn) add(C.PRO, 'prog', 'Progetto dell\'impianto termico (professionista abilitato, esterno), comprensivo di cassa', 1, 'a corpo', LP('prog_base') + LP('prog_kw') * Pn, { vcat: 'prof', pass: true, ref: 'DM 37/08 art. 5' });
   return { items, h, days, cH };
 }
@@ -2097,7 +2115,10 @@ function ctCalc(R, O, z) {
   const src = z.src, tw = num('Tw_des');
   const key = O.ctTipo !== 'auto' ? O.ctTipo : ((src === 'air' ? 'aw' : src === 'wat' ? 'ww' : 'gw') + (tw <= 35 ? '35' : '55'));
   const T = CT_TAB[key], zone = P.zoneOf(num('c_GG')), Quf = QUF[zone] || 1700;
-  const Pr = O.ctP > 0 ? +O.ctP : z.Pn, typ = !(O.ctScop > 0) || !(O.ctEta > 0), scop = O.ctScop > 0 ? +O.ctScop : T.typ[0], eta = (O.ctEta > 0 ? +O.ctEta : T.typ[1]) / 100;
+  // Prated (Reg. UE 813/2013): potenza alla temperatura di progetto del clima medio (−10 °C) e alla temperatura di applicazione (35/55 °C).
+  // Senza dato di scheda si stima dalla curva della macchina dello step 04, invece di usare la taglia nominale A7/W35.
+  const twApp = /35$/.test(key) ? 35 : 55, M = st.hp, prEst = M ? z.Pn * M.capF(-10, twApp) : z.Pn * 0.75;
+  const prAuto = !(O.ctP > 0), Pr = O.ctP > 0 ? +O.ctP : Math.round(prEst * 10) / 10, typ = !(O.ctScop > 0) || !(O.ctEta > 0), scop = O.ctScop > 0 ? +O.ctScop : T.typ[0], eta = (O.ctEta > 0 ? +O.ctEta : T.typ[1]) / 100;
   const low = Pr <= 35, Ci = low ? T.ciLow : T.ciHigh, years = low ? 2 : 5, kp = T.ns > 0 ? eta / T.ns : 0;
   const Ei = scop > 1 ? Pr * Quf * (1 - 1 / scop) * kp : 0, Ia = Ei * Ci, Itot = Ia * years;
   const spesa = O.soggetto === 'imp' ? R.P.net : R.P.gross;
@@ -2107,7 +2128,7 @@ function ctCalc(R, O, z) {
   if (scop < T.scopMin) why.push(`SCOP dichiarato ${nf(scop, 2)} sotto il minimo ${nf(T.scopMin, 2)}`);
   if (eta < T.ns) why.push(`ηs dichiarato ${nf(eta * 100, 0)} % sotto il minimo ${nf(T.ns * 100, 0)} %`);
   if (z.cooling) why.push('macchina dimensionata sul freddo');
-  return { typ, key, T, zone, Quf, Pr, scop, eta, Ci, years, kp, Ei, Ia, Itot, cap, spesa, I: why.length ? 0 : I, capped: Itot > cap, eligible: !why.length, why, rataUnica: (why.length ? 0 : I) <= 15000 };
+  return { prAuto, prEst, twApp, typ, key, T, zone, Quf, Pr, scop, eta, Ci, years, kp, Ei, Ia, Itot, cap, spesa, I: why.length ? 0 : I, capped: Itot > cap, eligible: !why.length, why, rataUnica: (why.length ? 0 : I) <= 15000 };
 }
 
 /* ---------------- ricalcolo e pannello ---------------- */
@@ -2118,6 +2139,8 @@ function recalc() {
     const z = sizing(), B = build(z); const O = DB.of;
     B.P = price(B, O); B.z = z; B.ct = ctCalc(B, O, z);
     const se = st.season || {}; B.sav = (se.cEX || 0) - (se.cHP || 0);
+    // detrazione alternativa (Ecobonus / bonus casa 2026: 50 % abitazione principale, 36 % altre; limite di detrazione 30.000 € per la sostituzione dell'impianto)
+    B.detr = O.detr === 'no' || O.soggetto === 'imp' || O.soggetto === 'pa' ? 0 : Math.min(B.P.gross * (O.detr === 'princ' ? 0.5 : 0.36), 30000);
     R = B; renderPanel(); renderBoq();
   } catch (e) { console.error(e); }
 }
@@ -2134,6 +2157,7 @@ function renderPanel() {
   $('o_hours').textContent = nf(R.h, 1) + ' h'; $('o_days').textContent = R.days + ' gg';
   const netCli = Pp.gross - (ct.eligible ? ct.I : 0);
   $('o_netcli').textContent = nf(Math.round(netCli), 0);
+  $('o_detr').textContent = R.detr > 0 ? nf(Math.round(R.detr), 0) : '—';
   $('o_sav').textContent = nf(Math.round(R.sav), 0);
   $('o_pb').textContent = R.sav > 0 ? nf(netCli / R.sav, 1) : '—';
   const al = [];
@@ -2143,6 +2167,14 @@ function renderPanel() {
   if (!(DB.of.pMacc > 0)) al.push(['i', 'Prezzo della macchina stimato dal listino (quota fissa + €/kW): inserisci quello dell\'offerta del fornitore nella scheda Commerciale.']);
   if (z.dv > 4) al.push(['w', `Caduta di tensione ${nf(z.dv, 1)} % anche con 16 mm²: linea troppo lunga, verificare.`]);
   if (st.pimpMode === 'freddo') al.push(['i', 'La macchina è dimensionata sul carico freddo: il Conto Termico non è stimato.']);
+  if (ct.prAuto && DB.of.ctOn && ct.eligible) al.push(['w', `Conto Termico con Prated stimato ${nf(ct.Pr, 1)} kW (resa della macchina da ${nf(z.Pn, 1)} kW a −10 °C e W${ct.twApp}): inserisci il Prated della scheda ErP prima di consegnare l'offerta.`]);
+  if (ct.eta > 0 && ct.eta < ct.T.ns) al.push(['w', `ηs dichiarato ${nf(ct.eta * 100, 0)} % sotto il minimo Ecodesign ${nf(ct.T.ns * 100, 0)} %: la macchina non rispetta i requisiti minimi (DM 28/10/2025, rinvio al Reg. UE 813/2013) né il Conto Termico.`]);
+  { const mono = DB.of.tipoMacc !== 'split' || z.src !== 'air', lim = mono ? (z.Pn <= 50 ? 150 : null) : (z.Pn <= 12 ? 150 : 750), from = mono ? '1/1/2027' : (z.Pn <= 12 ? '1/1/2027' : '1/1/2029');
+    if (lim && z.gwp >= lim) al.push(['w', `Refrigerante ${DB.of.refr} (GWP ${z.gwp}): per ${mono ? 'le pompe di calore monoblocco' : 'gli split aria-acqua'} da ${nf(z.Pn, 0)} kW il Reg. UE 2024/573 vieta l'immissione sul mercato con GWP ≥ ${lim} dal ${from}. Le macchine già immesse prima possono essere installate: verifica la disponibilità e preferisci R290.`]);
+    if (!mono && z.gwp > 750) al.push(['w', `Split con GWP > 750 (${DB.of.refr}): vietato dal 1/1/2025 per sistemi con meno di 3 kg di refrigerante (Reg. UE 2024/573, Allegato IV).`]); }
+  if (z.radiators && !z.vtOn) al.push(['i', 'Radiatori senza nuove valvole termostatiche: il DM 28/10/2025 le richiede con il nuovo generatore a pompa di calore, salvo regolazione per ambiente equivalente già presente. Motivalo nella relazione tecnica.']);
+  if (!z.relOn && z.relObb) al.push(['w', 'Relazione tecnica esclusa ma obbligatoria: il passaggio da caldaia a pompa di calore è un cambio di tipologia di generatore (D.Lgs. 192/2005 art. 8, DM 28/10/2025).']);
+  if (($('biv').value === 'par' || $('biv').value === 'alt') && DB.of.ctOn) al.push(['i', 'Configurazione con caldaia: il Conto Termico è stimato come pompa di calore pura. Un sistema ibrido factory-made rientra in un intervento diverso (DM 7/8/2025); la sola caldaia a combustibile fossile non è incentivabile.']);
   if (ct.typ && DB.of.ctOn) al.push(['w', `Conto Termico calcolato con SCOP ${nf(ct.scop, 2)} e ηs ${nf(ct.eta * 100, 0)} % tipici della classe ${ct.T.l}: inserisci i valori della scheda di prodotto prima di consegnare l'offerta.`]);
   if (O.ivaMode === 'bs' && Pp.bs && Pp.bs.exc > 0) al.push(['i', `IVA: la pompa di calore come bene significativo supera la metà del valore dei lavori; ${eur(Pp.bs.exc)} vanno al 22 %.`]);
   $('o_alerts').innerHTML = al.map(a => `<div class="alert ${a[0]}">${a[1]}</div>`).join('');
@@ -2314,10 +2346,10 @@ function printClient() {
   const netCli = Pp.gross - (ct.eligible && O.ctOn ? ct.I : 0);
   const ctHtml = O.ctOn ? (ct.eligible ? `<h2>Conto Termico 3.0 (stima)</h2><table><tbody>
       <tr><td>Intervento</td><td>Titolo III · sostituzione del generatore con pompa di calore · ${esc(ct.T.l)}</td></tr>
-      <tr><td>Parametri</td><td>Prated ${nf(ct.Pr, 1)} kW · zona ${ct.zone} (Quf ${ct.Quf} h) · SCOP ${nf(ct.scop, 2)} · ηs ${nf(ct.eta * 100, 0)} % · Ci ${nf(ct.Ci, 3)} €/kWh</td></tr>
+      <tr><td>Parametri</td><td>Prated ${nf(ct.Pr, 1)} kW${ct.prAuto ? ' (stimato)' : ''} · zona ${ct.zone} (Quf ${ct.Quf} h) · SCOP ${nf(ct.scop, 2)} · ηs ${nf(ct.eta * 100, 0)} % · Ci ${nf(ct.Ci, 3)} €/kWh</td></tr>
       <tr class="t"><td>Incentivo stimato</td><td class="n">${eur(ct.I)}${ct.capped ? ` (limitato al ${O.ctPct} % della spesa)` : ''}</td></tr>
       <tr><td>Erogazione</td><td>${ct.rataUnica ? 'in un\'unica rata (importo fino a 15.000 €)' : `in ${ct.years} rate annuali`}</td></tr></tbody></table>
-      <p class="pr-note">Stima secondo il DM 7 agosto 2025 con i dati di targa dichiarati. L'importo è determinato dal GSE all'accoglimento della domanda, da presentare entro i termini dalla fine dei lavori; richiede pagamenti tracciabili e la documentazione prevista. Non costituisce garanzia di ottenimento.</p>`
+      <p class="pr-note">Stima secondo il DM 7 agosto 2025 ${ct.prAuto || ct.typ ? 'con valori tipici o stimati, da confermare con la scheda di prodotto della macchina scelta' : 'con i dati della scheda di prodotto'}. L'importo è determinato dal GSE all'accoglimento della domanda, da presentare entro 90 giorni dalla conclusione dei lavori; richiede pagamenti tracciabili e la documentazione prevista. In alternativa al Conto Termico, sulla stessa spesa, si può usare la detrazione fiscale: le due agevolazioni non si cumulano. Non costituisce garanzia di ottenimento.</p>`
     : `<p class="pr-note">Conto Termico: con i dati attuali l'intervento non accede all'incentivo (${esc(ct.why.join('; '))}).</p>`) : '';
   const econ = R.sav > 0 ? `<h2>Risparmio stimato</h2><table><tbody><tr><td>Costo annuo attuale (stima)</td><td class="n">${eur(se.cEX)}</td></tr><tr><td>Costo annuo con la pompa di calore (stima)</td><td class="n">${eur(se.cHP)}</td></tr><tr class="t"><td>Risparmio annuo</td><td class="n">${eur(R.sav)}</td></tr><tr><td>Rientro semplice${O.ctOn && ct.eligible ? ' dopo il Conto Termico' : ''}</td><td class="n">${nf(netCli / R.sav, 1)} anni</td></tr></tbody></table><p class="pr-note">Stime con prezzi dell'energia di ${nf(num('pr_el'), 2)} €/kWh e del combustibile attuale indicati nello studio; i consumi reali dipendono dall'uso, dal clima e dalla regolazione.</p>` : '';
   return `${printHead('Offerta impianto a pompa di calore', 'Preventivo')}${cliLine()}
@@ -2327,8 +2359,10 @@ function printClient() {
   <h2>Caratteristiche dell'impianto</h2><table><tbody>${comp.map(([a, b]) => `<tr><td style="width:24%">${a}</td><td>${b}</td></tr>`).join('')}</tbody></table>
   <h2>Dettaglio economico</h2><table><thead><tr><th>Voce</th><th class="n">Imponibile</th><th class="n">IVA</th><th class="n">Totale</th></tr></thead><tbody>${cats}<tr class="t"><td>Totale</td><td class="n">${eur(Pp.net)}</td><td class="n">${eur(Pp.vat)}</td><td class="n">${eur(Pp.gross)}</td></tr></tbody></table>
   ${ivaPrint()}${ctHtml}${econ}
-  <h2>Cosa è compreso</h2><table><tbody><tr><td>Fornitura, trasporto e posa della pompa di calore e dei componenti elencati; collegamenti idraulici ed elettrici; ${O.smont !== 'no' ? 'smontaggio e smaltimento del generatore esistente; ' : ''}${O.lavaggio ? 'lavaggio dell\'impianto e trattamento dell\'acqua secondo UNI 8065; ' : ''}riempimento, configurazione della regolazione climatica, messa in servizio e istruzione all'uso.</td></tr><tr><td>Dichiarazione di conformità (DM 37/08) con schema dell'impianto e relazione dei materiali; ${O.cit ? 'libretto di impianto e registrazione al catasto degli impianti termici; ' : ''}${O.rel ? 'relazione tecnica sui requisiti minimi; ' : ''}${R.z.progOn ? 'progetto redatto da professionista abilitato; ' : ''}${O.praCT ? 'predisposizione della pratica Conto Termico.' : ''}</td></tr></tbody></table>
+  ${R.detr > 0 ? `<p class="pr-note">Detrazione fiscale alternativa al Conto Termico (2026: ${O.detr === 'princ' ? '50 % abitazione principale' : '36 % altre unità'}, in 10 rate annuali): circa ${eur(R.detr)}, se c'è capienza IRPEF. Aliquote 2027 in discussione nella legge di bilancio.</p>` : ''}
+  <h2>Cosa è compreso</h2><table><tbody><tr><td>Fornitura, trasporto e posa della pompa di calore e dei componenti elencati; collegamenti idraulici ed elettrici; ${O.smont !== 'no' ? 'smontaggio e smaltimento del generatore esistente; ' : ''}${O.lavaggio ? 'lavaggio dell\'impianto e trattamento dell\'acqua secondo UNI 8065; ' : ''}riempimento, configurazione della regolazione climatica, messa in servizio e istruzione all'uso.</td></tr><tr><td>Dichiarazione di conformità (DM 37/08) con schema dell'impianto e relazione dei materiali; ${O.cit ? 'libretto di impianto e registrazione al catasto degli impianti termici; ' : ''}${R.z.relOn ? 'relazione tecnica sui requisiti minimi; ' : ''}${R.z.progOn ? 'progetto redatto da professionista abilitato; ' : ''}${O.praCT ? 'predisposizione della pratica Conto Termico.' : ''}</td></tr></tbody></table>
   <h2>Cosa non è compreso</h2><table><tbody><tr><td>Opere murarie oltre quelle indicate; adeguamento dell'impianto elettrico esistente e aumento della potenza contrattuale; modifiche ai terminali di emissione; pratiche edilizie o paesaggistiche eventualmente necessarie per l'unità esterna; quanto non espressamente indicato.</td></tr></tbody></table>
+  <h2>Dopo l'installazione</h2><table><tbody><tr><td>Libretto di impianto e manutenzione secondo le istruzioni del costruttore${z.Pn >= 12 ? '; controllo di efficienza energetica con rapporto di tipo 2 ogni 4 anni (DPR 74/2013, pompe di calore da 12 kW)' : ''}${O.tipoMacc === 'split' && z.src === 'air' ? '; controlli delle perdite di refrigerante secondo il Reg. UE 2024/573 in base alla carica' : ''}.</td></tr></tbody></table>
   <h2>Condizioni</h2><table><tbody><tr><td style="width:24%">Pagamento</td><td>${esc(O.pagamento)}</td></tr><tr><td>Tempi</td><td>${esc(O.tempi)}</td></tr><tr><td>Garanzie</td><td>${esc(O.garanzia)}</td></tr><tr><td>Validità</td><td>${+O.validita || 30} giorni dalla data di emissione.</td></tr></tbody></table>
   <p class="pr-warn">Prestazioni, consumi, risparmi e incentivo sono stime basate sui dati disponibili in fase di offerta e vanno confermati dal sopralluogo e dai dati di targa della macchina scelta.</p>
   <table style="margin-top:18px"><tbody><tr><td style="height:46px;width:50%">Per accettazione (firma del cliente)</td><td>${esc(O.azienda || 'L\'impresa')}${O.tecnico ? ' · ' + esc(O.tecnico) : ''}</td></tr></tbody></table>
@@ -2364,21 +2398,22 @@ function printTech() {
     ['Portata del circuito primario rispetto al minimo del costruttore', 'manuale costruttore', 'l/h'],
     z.src === 'air' && O.gelo !== 'no' ? ['Funzionamento della protezione antigelo', 'manuale costruttore', ''] : null,
     O.tipoMacc === 'split' && z.src === 'air' ? ['Prova di tenuta e vuoto del circuito frigorifero, carica e registrazione F-gas', 'Reg. UE 2024/573 · DPR 146/2018', 'kg'] : null,
-    ['Continuità del conduttore di protezione e collegamenti equipotenziali', 'CEI 64-8 art. 612.2', 'Ω'],
-    ['Resistenza di isolamento della linea dedicata', 'CEI 64-8 art. 612.3', 'MΩ'],
-    ['Prova del differenziale (IΔn e tempo di intervento)', 'CEI 64-8 art. 612.6', 'mA / ms'],
+    ['Continuità del conduttore di protezione e collegamenti equipotenziali', 'CEI 64-8:2024 Parte 6 (prove)', 'Ω'],
+    ['Resistenza di isolamento della linea dedicata', 'CEI 64-8:2024 Parte 6 (prove)', 'MΩ'],
+    ['Prova del differenziale (IΔn e tempo di intervento)', 'CEI 64-8:2024 Parte 6 (prove)', 'mA / ms'],
     ['Prova di funzionamento in riscaldamento, ACS e sbrinamento; impostazione della curva climatica', 'manuale costruttore', '°C'],
-    z.acsL > 0 ? ['Ciclo antilegionella e taratura della miscelatrice termostatica', 'Linee guida legionellosi 2015 · UNI EN 15092', '°C'] : null,
+    z.vtOn ? ['Montaggio e funzionamento delle valvole termostatiche a bassa inerzia', 'DM 28/10/2025 · UNI EN 215', 'n.'] : null,
+    z.acsL > 0 ? ['Ciclo antilegionella e taratura della miscelatrice termostatica', 'Linee guida legionellosi 2015 · D.Lgs. 18/2023 · UNI EN 15092', '°C'] : null,
     ['Compilazione del libretto di impianto e del rapporto di controllo di efficienza energetica', 'DPR 74/2013 · DM 10/02/2014', '']
   ].filter(Boolean).map(([a, b, u]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td><td class="blank">${u ? '<span class="mu">' + u + '</span>' : ''}</td><td class="blank"></td></tr>`).join('');
-  const docs = ['Dichiarazione di conformità dell\'impianto termico (DM 37/08 art. 1 c. 2 lett. c) sul modello dell\'Allegato I', 'Dichiarazione di conformità della linea elettrica dedicata (DM 37/08 art. 1 c. 2 lett. a), se realizzata', 'Relazione con le tipologie dei materiali utilizzati (sezione 3)', 'Schema dell\'impianto realizzato (sezione 2, aggiornato all\'esecuzione)', z.progOn ? 'Progetto del professionista (obbligatorio)' : 'Progetto: non obbligatorio sotto 40.000 frigorie/h (verificare)', 'Visura camerale dell\'impresa (requisiti tecnico-professionali)', 'Schede tecniche e dichiarazioni CE di pompa di calore, bollitore e componenti; scheda di prodotto ErP', 'Libretto di impianto e rapporto di controllo di efficienza energetica', O.rel ? 'Relazione tecnica sui requisiti minimi (DM 26/06/2015)' : null, 'Esiti delle verifiche iniziali (sezione 5)'].filter(Boolean);
+  const docs = ['Dichiarazione di conformità dell\'impianto termico (DM 37/08 art. 1 c. 2 lett. c) sul modello dell\'Allegato I', 'Dichiarazione di conformità della linea elettrica dedicata (DM 37/08 art. 1 c. 2 lett. a), se realizzata', 'Relazione con le tipologie dei materiali utilizzati (sezione 3)', 'Schema dell\'impianto realizzato (sezione 2, aggiornato all\'esecuzione)', z.progOn ? 'Progetto del professionista (obbligatorio)' : 'Progetto: non obbligatorio sotto 40.000 frigorie/h (verificare)', 'Visura camerale dell\'impresa (requisiti tecnico-professionali)', 'Schede tecniche e dichiarazioni CE di pompa di calore, bollitore e componenti; scheda di prodotto ErP', 'Libretto di impianto e rapporto di controllo di efficienza energetica', R.z.relOn ? 'Relazione tecnica sui requisiti minimi (D.Lgs. 192/2005 art. 8 · DM 28/10/2025)' : null, 'Esiti delle verifiche iniziali (sezione 5)'].filter(Boolean);
   return `${printHead('Schema d\'impianto e allegati tecnici', 'Allegati alla dichiarazione di conformità · DM 37/08 art. 7')}${cliLine()}
-  <p class="pr-warn">Documento preliminare prodotto dallo strumento di calcolo, a uso interno. Lo schema è funzionale e non sostituisce il progetto: diametri, vasi, sicurezze e regolazione vanno verificati dall'impresa installatrice (e dal progettista, ove obbligatorio) con i dati della macchina scelta e dell'esecuzione. Per impianti oltre 35 kW verificare anche l'applicabilità della Raccolta R INAIL.</p>
+  <p class="pr-warn">Documento preliminare prodotto dallo strumento di calcolo, a uso interno. Lo schema è funzionale e non sostituisce il progetto: diametri, vasi, sicurezze e regolazione vanno verificati dall'impresa installatrice (e dal progettista, ove obbligatorio) con i dati della macchina scelta e dell'esecuzione. Per impianti oltre 35 kW verificare anche l'applicabilità della Raccolta R INAIL. Refrigerante e obblighi F-gas: Reg. UE 2024/573 e DPR 146/2018.</p>
   <h2>1. Dati dell'impianto</h2><table><tbody><tr><td style="width:24%">Committente</td><td>${esc(O.cliente || '')}</td></tr><tr><td>Ubicazione</td><td>${esc([O.indirizzo, st.comune].filter(Boolean).join(', '))}</td></tr><tr><td>Tipo di intervento</td><td>${O.sost ? 'Sostituzione del generatore di calore con pompa di calore' : 'Nuovo impianto a pompa di calore'}${z.acsL > 0 ? ' per riscaldamento e ACS' : ' per riscaldamento'}</td></tr><tr><td>Generatore</td><td>${esc(R.items.find(i => i.id === 'pdc').desc)}</td></tr></tbody></table>
   <h2>2. Schema funzionale (P&amp;ID)</h2><div class="pid">${pidSvg()}</div>
   <h2 class="pr-sec">3. Distinta dei componenti e relazione dei materiali</h2><table><thead><tr><th>Sigla</th><th>Componente</th><th>Norma di prodotto</th><th class="n">Quantità</th><th>Marca e modello installati</th></tr></thead><tbody>${mats}</tbody></table>
   <h2>4. Dimensionamento (valori calcolati)</h2><table><tbody>${dimsList().map(([a, b]) => `<tr><td style="width:26%">${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</tbody></table>
-  <p class="pr-note">Criteri: carico termico UNI EN 12831-1; potenza e contenuto d'acqua secondo AiCARR – M. Vio; derating dai dati UNI EN 14511; tubazioni a velocità ≤ 1,0 m/s; vaso di espansione con coefficiente di dilatazione 0,02 tra 10 e 60 °C; linea elettrica con Ib ≤ In ≤ Iz (CEI-UNEL 35024/1, posa B2) e caduta di tensione ≤ 4 %.</p>
+  <p class="pr-note">Criteri: carico termico UNI EN 12831-1; potenza e contenuto d'acqua secondo AiCARR – M. Vio; derating dai dati UNI EN 14511; tubazioni a velocità ≤ 1,0 m/s; vaso di espansione con coefficiente di dilatazione 0,02 tra 10 e 60 °C; linea elettrica con Ib ≤ In ≤ Iz (CEI 64-8:2024, portate CEI-UNEL 35024/1, posa B2) e caduta di tensione ≤ 4 %. Requisiti minimi: D.Lgs. 192/2005 e DM 28/10/2025 (in vigore dal 3/6/2026).</p>
   <h2 class="pr-sec">5. Verifiche iniziali (da compilare in campo)</h2><table><thead><tr><th>Verifica</th><th>Riferimento</th><th>Valore misurato</th><th>Esito</th></tr></thead><tbody>${ver}</tbody></table>
   <h2>6. Documenti da allegare</h2><table><tbody>${docs.map(x => `<tr><td><span class="chkbox"></span>${esc(x)}</td></tr>`).join('')}</tbody></table>
   <table class="sig" style="margin-top:16px"><tbody><tr><td style="width:50%">Il responsabile tecnico dell'impresa installatrice</td><td>${z.progOn ? 'Il progettista' : 'Data'}</td></tr></tbody></table>
@@ -2392,7 +2427,7 @@ function printInternal() {
   const lst = Object.keys(DB.listino).length;
   return `${printHead('Analisi interna del preventivo', 'Uso riservato · ' + offerName())}
   <div class="pr-hero"><div class="us"><span class="l">Costo interno</span><span class="v">${eur(Pp.cost)}</span><span class="n">${nf(R.h, 1)} h uomo · ${R.days} gg</span></div><div class="them"><span class="l">Prezzo netto / IVA incl.</span><span class="v">${eur(Pp.net)}</span><span class="n">${eur(Pp.gross)} IVA inclusa</span></div></div>
-  <div class="pr-mini"><div><span class="l">Margine</span><span class="v">${nf(Pp.margin, 1)} %</span><span class="n">sul prezzo netto</span></div><div class="pro"><span class="l">Utile lordo</span><span class="v">${eur(Pp.profit)}</span><span class="n">ricarico ${nf(Pp.markup, 1)} %</span></div><div><span class="l">Conto Termico</span><span class="v">${eur(ct.eligible ? ct.I : 0)}</span><span class="n">${ct.eligible ? 'stima' : 'non accede'}</span></div><div class="sic"><span class="l">Macchina</span><span class="v">${nf(R.z.Pn, 1)} kW</span><span class="n">${DB.of.pMacc > 0 ? 'prezzo fornitore' : 'prezzo stimato'}</span></div></div>
+  <div class="pr-mini"><div><span class="l">Margine</span><span class="v">${nf(Pp.margin, 1)} %</span><span class="n">sul prezzo netto</span></div><div class="pro"><span class="l">Utile lordo</span><span class="v">${eur(Pp.profit)}</span><span class="n">ricarico ${nf(Pp.markup, 1)} %</span></div><div><span class="l">Conto Termico</span><span class="v">${eur(ct.eligible ? ct.I : 0)}</span><span class="n">${!ct.eligible ? 'non accede' : (ct.prAuto || ct.typ) ? 'dati stimati' : 'dati di scheda'}</span></div><div class="sic"><span class="l">Macchina</span><span class="v">${nf(R.z.Pn, 1)} kW</span><span class="n">${DB.of.pMacc > 0 ? 'prezzo fornitore' : 'prezzo stimato'}</span></div></div>
   <h2>Riepilogo per categoria</h2><table><thead><tr><th>Categoria</th><th class="n c-us">Costo</th><th class="n c-them">Prezzo netto</th></tr></thead><tbody>${catRows}<tr><td>Trasporto (${nf(+DB.of.transport, 1)} %) e imprevisti (${nf(+DB.of.contingency, 1)} %)</td><td class="n c-us">${eur(Pp.transport + Pp.contingency)}</td><td></td></tr><tr class="t"><td>Totale</td><td class="n c-us">${eur(Pp.cost)}</td><td class="n c-them">${eur(Pp.net)}</td></tr></tbody></table>
   <p class="pr-note">Listino: ${lst ? lst + ' voci personalizzate' : 'solo valori di default (ipotesi da sostituire)'} · costo orario ${nf(R.cH, 2)} €/h · squadra di ${+DB.of.squadra || 1}.</p>
   <h2 class="pr-sec">Computo estimativo</h2><table><thead><tr><th>Voce</th><th>UM</th><th class="n">Q.tà</th><th class="n">Unit.</th><th class="n c-us">Costo</th></tr></thead><tbody>${rows}</tbody></table>
@@ -2677,6 +2712,7 @@ function snapshotInputs() {
 }
 function restoreInputs(I) {
   if (!I || !I.v) return;
+  if (I.comuneName) { const i = P.COMUNI.findIndex(c => c[0] + ' (' + c[1] + ')' === I.comuneName); if (i >= 0) P.pickComune(i); }
   for (const [id, val] of Object.entries(I.v)) { const el = $(id); if (!el) continue; if (el.type === 'checkbox') el.checked = !!val; else el.value = val; }
   const fill = (id, data, adder) => { if (!data) return; const box = $(id); box.innerHTML = ''; data.forEach(adder); };
   fill('an_rows', I.an, r => { $('an_add').click(); const row = $('an_rows').lastElementChild; row.querySelector('.a-t').value = r[0]; row.querySelector('.a-a').value = r[1]; row.querySelector('.a-u').value = r[2]; });
@@ -2689,14 +2725,14 @@ function restoreInputs(I) {
   clickSeg('hMethod', 'm', seg.hMethod); clickSeg('tagMode', 'm', seg.tagMode); clickSeg('paMode', 'm', seg.paMode); clickSeg('vpMode', 'm', seg.vpMode); clickSeg('vTermMode', 'm', seg.vTermMode); clickSeg('pimpMode', 'm', seg.pimpMode);
   ['src', 'biv', 'tipo'].forEach(id => { const el = $(id); if (el) { const v = el.value; el.dispatchEvent(new Event('change', { bubbles: true })); el.value = v; } });
   if (I.v.Tw_des != null) $('Tw_des').value = I.v.Tw_des; if (I.v.Tw_min != null) $('Tw_min').value = I.v.Tw_min; if (I.v.unit != null) $('unit').value = I.v.unit; if (I.v.T_src != null) $('T_src').value = I.v.T_src;
-  if (I.comuneName) { $('c_search').value = I.comune || I.comuneName; st.comune = I.comuneName; }
+  if (I.comuneName) { $('c_search').value = I.comune || I.comuneName; st.comune = I.comuneName; if (I.v.c_zona) $('c_zona').value = I.v.c_zona; }
   P.computeAll();
 }
 function download(name, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 function importBackup(text) {
   let d; try { d = JSON.parse(text); } catch (e) { return toast('File non valido'); }
   if (!d || !d.of) return toast('Il file non è un backup di questo strumento');
-  DB.of = Object.assign({}, OF0, d.of); DB.ov = d.ov || {}; DB.created = d.created || Date.now(); DB.id = d.id || DB.id;
+  DB.of = fixOld(Object.assign({}, OF0, d.of)); DB.ov = d.ov || {}; DB.created = d.created || Date.now(); DB.id = d.id || DB.id;
   let nl = 0; for (const [k, e] of Object.entries(d.listino || {})) { const m = DB.listino[k]; if (e && e.v != null && (!m || (e.date || '') > (m.date || ''))) { DB.listino[k] = e; nl++; } }
   bindValues(); restoreInputs(d.inputs); save(); recalc(); renderListinoCount();
   toast('Studio importato' + (nl ? ` e ${nl} voci di listino aggiornate` : ''));
